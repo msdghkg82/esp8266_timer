@@ -1,0 +1,234 @@
+#include <api_handlers.h>
+
+#include "Arduino.h"
+#include <ESP8266WiFi.h>
+#include <ArduinoJson.h>
+#include <Ticker.h>
+#include <PersianDate.h>
+#include <time.h>
+#include <algorithm>
+
+#include <RTC.h>
+#include <Webserver.h>
+
+
+#define TehranUTC 12600
+
+Schedule ScheduleArray[50];
+
+uint8_t ScheduleCount = 0;
+
+
+
+
+uint8_t LEDstate = 1;
+
+Ticker timer1;
+
+
+
+PersianDate pd;
+
+
+
+
+void handleRoot()
+{
+	server.send(200, "text/html", "<h1>Connected</h1>");
+}
+
+void handleStatus()
+{
+	JsonDocument json;
+	json["SSID"] = WiFi.softAPSSID();
+	json["IP"] = WiFi.softAPIP().toString();
+	json["LED State"] = !(LEDstate) ? "high" : "low";
+
+	String HandleRootJson;
+	serializeJson(json, HandleRootJson);
+	server.send(200, "application/json", HandleRootJson);
+}
+
+
+void timer1_callback()
+{
+	digitalWrite(LED_BUILTIN, !LEDstate);
+}
+
+void handleTimer()
+{
+	JsonDocument doc;
+	DeserializationError error = deserializeJson(doc, server.arg("plain"));
+
+	if(error)
+	{
+		server.send(200, "text/html", "<h1>invalid json</h1>");
+		return;
+	}
+
+	if(doc["seconds"].is<float_t>())
+	{
+		float seconds = doc["seconds"].as<float_t>();
+		if(doc["state"].is<uint8_t>())
+		{
+			LEDstate = doc["state"].as<uint8_t>();
+			timer1.once(seconds, timer1_callback);
+			server.send(200, "text/html", "<h1>تغییر وضعیت در 3 ثانیه</h1>");
+		}
+	}
+	else
+	{
+		server.send(200, "text/html", "<h1>invalid number of seconds</h1>");
+	}
+}
+
+
+
+void handleTimestamp()
+{
+	JsonDocument doc;
+	DeserializationError error = deserializeJson(doc, server.arg("plain"));
+
+	if(error)
+		{
+			server.send(200, "text/html", "<h1>invalid json</h1>");
+			return;
+		}
+	else
+	{
+
+		if(doc["timestamp"].is<uint32_t>())
+		{
+			systemtimestamp = doc["timestamp"].as<uint32_t>() + TehranUTC;
+			RTC_setTimestamp(systemtimestamp);
+			updateDate();
+			server.send(200, "text/html", "<h1>timestamp set</h1>");
+		}
+	}
+}
+
+void handleDate()
+{
+
+	updateDate();
+	pd.setGregorianDate(Datetime.year, Datetime.month, Datetime.day);
+	pd.convertGregorianToPersian();
+
+	JsonDocument doc;
+	doc["Timestamp"] = time(nullptr);
+
+	doc["miladi"]["year"] = Datetime.year;
+	doc["miladi"]["month"] = Datetime.month;
+	doc["miladi"]["day"] = Datetime.day;
+	doc["miladi"]["hour"] = Datetime.hour;
+	doc["miladi"]["minute"] = Datetime.minute;
+	doc["miladi"]["second"] = Datetime.second;
+
+	doc["shamsi"]["date"] = pd.getPersianDateStringWithNames();
+	doc["shamsi"]["hour"] = Datetime.hour;
+	doc["shamsi"]["minute"] = Datetime.minute;
+	doc["shamsi"]["second"] = Datetime.second;
+
+	String Datejson;
+	serializeJson(doc, Datejson);
+	server.send(200, "application/json", Datejson);
+}
+
+void sortSchedules()
+{
+	std::sort(ScheduleArray, ScheduleArray + ScheduleCount,
+			[](const Schedule& a, const Schedule& b)
+		{
+			if(a.flag != b.flag)
+			{
+				return a.flag > b.flag;
+			}
+			return a.ScheduleTimeStamp < b.ScheduleTimeStamp;
+		}
+	);
+}
+
+void AddSchedule(uint32_t timestamp, uint8_t state, uint8_t id)
+{
+	if(ScheduleCount < 50)
+	{
+		ScheduleArray[ScheduleCount].ScheduleTimeStamp = timestamp;
+		ScheduleArray[ScheduleCount].state = state;
+		ScheduleArray[ScheduleCount].id = id;
+		ScheduleArray[ScheduleCount].flag = true;
+		ScheduleCount++;
+		sortSchedules();
+	}
+	else
+	{
+		server.send(200, "text/html", "<h1>no space</h1>");
+	}
+}
+
+void handleSchedule()
+{
+	JsonDocument doc;
+	DeserializationError error = deserializeJson(doc, server.arg("plain"));
+
+	if(error)
+		{
+			server.send(200, "text/html", "<h1>invalid json</h1>");
+			return;
+		}
+	else
+	{
+
+		if(doc["scheduletimestamp"].is<uint32_t>() && doc["state"].is<uint8_t>() && doc["id"].is<uint16_t>())
+		{
+			AddSchedule(doc["scheduletimestamp"], doc["state"], doc["id"]);
+			server.send(200, "text/html", "<h1>schedule set</h1>");
+		}
+		else
+		{
+			server.send(200, "text/html", "<h1>invalid timestamp or state</h1>");
+		}
+	}
+}
+
+void ProcessSchedules()
+{
+    while (ScheduleCount > 0)
+    {
+        if (!ScheduleArray[0].flag)
+            break;
+
+        if (time(nullptr) < ScheduleArray[0].ScheduleTimeStamp)
+            break;
+
+        digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
+
+        for (uint8_t j = 1; j < ScheduleCount; j++)
+        {
+            ScheduleArray[j - 1] = ScheduleArray[j];
+        }
+
+        ScheduleCount--;
+    }
+}
+
+void handleGetSchedules()
+{
+    JsonDocument doc;
+
+    JsonArray array = doc["schedules"].to<JsonArray>();
+
+    for (uint8_t i = 0; i < ScheduleCount; i++) {
+
+        JsonObject obj = array.add<JsonObject>();
+
+        obj["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
+        obj["state"]     = ScheduleArray[i].state;
+        obj["enabled"]   = ScheduleArray[i].flag;
+    }
+
+    String response;
+    serializeJson(doc, response);
+
+    server.send(200, "application/json", response);
+}
+
