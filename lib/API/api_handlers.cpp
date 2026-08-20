@@ -115,7 +115,7 @@ void handleDate()
 	pd.convertGregorianToPersian();
 
 	JsonDocument doc;
-	doc["Timestamp"] = time(nullptr);
+	doc["Timestamp"] = systemtimestamp;
 
 	doc["miladi"]["year"] = Datetime.year;
 	doc["miladi"]["month"] = Datetime.month;
