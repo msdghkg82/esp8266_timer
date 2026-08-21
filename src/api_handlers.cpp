@@ -14,7 +14,7 @@
 
 #define TehranUTC 12600
 
-Schedule_t ScheduleArray[50];
+Schedule_t ScheduleArray[50] = {0};
 
 uint8_t ScheduleCount = 0;
 
@@ -195,31 +195,29 @@ void handleSchedule()
 
 void ProcessSchedules()
 {
-	for(int i = 0; i < ScheduleCount; i++)
+	if(ScheduleArray[0].flag == false)
+	return;
+
+	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp)
+	return;
+
+	digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
+
+	if(ScheduleArray[0].interval == once)
 	{
-		if(ScheduleArray[i].flag == false)
-		break;
-
-		if(ScheduleArray[i].ScheduleTimeStamp < systemtimestamp)
-		break;
-
-		digitalWrite(LED_BUILTIN, !ScheduleArray[i].state);
-
-		if(ScheduleArray[i].interval == once)
-		{
-			ScheduleArray[i].flag = false;
-		}
-		else if(ScheduleArray[i].interval == daily)
-		{
-			ScheduleArray[i].ScheduleTimeStamp += 86400;
-			//ScheduleArray[i].flag = true;
-		}
-		else if(ScheduleArray[i].interval == weekly)
-		{
-			ScheduleArray[i].ScheduleTimeStamp += 604800;
-			//ScheduleArray[i].flag = true;
-		}
-
+		ScheduleArray[0].flag = false;
+		sortSchedules();
+	}
+	else if(ScheduleArray[0].interval == daily)
+	{
+		ScheduleArray[0].ScheduleTimeStamp += 86400;
+		//ScheduleArray[i].flag = true;
+		sortSchedules();
+	}
+	else if(ScheduleArray[0].interval == weekly)
+	{
+		ScheduleArray[0].ScheduleTimeStamp += 604800;
+		//ScheduleArray[i].flag = true;
 		sortSchedules();
 	}
 }
