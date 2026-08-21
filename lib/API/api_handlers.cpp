@@ -194,19 +194,27 @@ void ProcessSchedules()
 {
 	for(int i = 0; i < ScheduleCount; i++)
 	{
-		if(ScheduleArray[0].flag == false)
-		return;
+		if(ScheduleArray[i].flag == false)
+		break;
 
-		if(ScheduleArray[0].ScheduleTimeStamp < systemtimestamp)
-		return;
+		if(ScheduleArray[i].ScheduleTimeStamp < systemtimestamp)
+		break;
 
-		digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
-		ScheduleArray[0].flag = false;
+		digitalWrite(LED_BUILTIN, !ScheduleArray[i].state);
 
-		if(ScheduleArray[0].interval == daily)
+		if(ScheduleArray[i].interval == once)
 		{
-			ScheduleArray[0].ScheduleTimeStamp += 86400;
-			ScheduleArray[0].flag = true;
+			ScheduleArray[i].flag = false;
+		}
+		else if(ScheduleArray[i].interval == daily)
+		{
+			ScheduleArray[i].ScheduleTimeStamp += 86400;
+			//ScheduleArray[i].flag = true;
+		}
+		else if(ScheduleArray[i].interval == weekly)
+		{
+			ScheduleArray[i].ScheduleTimeStamp += 604800;
+			//ScheduleArray[i].flag = true;
 		}
 
 		sortSchedules();

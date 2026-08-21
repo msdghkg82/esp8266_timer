@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 typedef enum {
-	none = 0,
+	once = 0,
 	daily,
 	weekly,
 	monthly
