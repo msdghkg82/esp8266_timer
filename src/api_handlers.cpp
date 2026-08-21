@@ -235,7 +235,8 @@ void handleGetSchedules()
         JsonObject obj = array.add<JsonObject>();
 
         obj["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
-        obj["state"]     = ScheduleArray[i].state;
+		obj["state"]     = ScheduleArray[i].state;
+        obj["interval"]  = ScheduleArray[i].interval;
         obj["enabled"]   = ScheduleArray[i].flag;
     }
 
