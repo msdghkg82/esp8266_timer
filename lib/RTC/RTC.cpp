@@ -21,7 +21,7 @@ void RTC_cc()
 void updateDate()
 {
 	time_t now = time(nullptr);
-	struct tm * t; 
+	struct tm * t{}; 
 	localtime_r(&now, t);
 	Datetime.year = t->tm_year + 1900;
 	Datetime.month = t->tm_mon + 1;
