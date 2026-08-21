@@ -14,7 +14,7 @@
 
 #define TehranUTC 12600
 
-Schedule ScheduleArray[50];
+Schedule_t ScheduleArray[50];
 
 uint8_t ScheduleCount = 0;
 
@@ -137,7 +137,7 @@ void handleDate()
 void sortSchedules()
 {
 	std::sort(ScheduleArray, ScheduleArray + ScheduleCount,
-			[](const Schedule& a, const Schedule& b)
+			[](const Schedule_t& a, const Schedule_t& b)
 		{
 			if(a.flag != b.flag)
 			{
@@ -192,23 +192,25 @@ void handleSchedule()
 
 void ProcessSchedules()
 {
-    while (ScheduleCount > 0)
-    {
-        if (!ScheduleArray[0].flag)
-            break;
+	for(int i = 0; i < ScheduleCount; i++)
+	{
+		if(ScheduleArray[0].flag == false)
+		return;
 
-        if (time(nullptr) < ScheduleArray[0].ScheduleTimeStamp)
-            break;
+		if(ScheduleArray[0].ScheduleTimeStamp < systemtimestamp)
+		return;
 
-        digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
+		digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
+		ScheduleArray[0].flag = false;
 
-        for (uint8_t j = 1; j < ScheduleCount; j++)
-        {
-            ScheduleArray[j - 1] = ScheduleArray[j];
-        }
+		if(ScheduleArray[0].interval == daily)
+		{
+			ScheduleArray[0].ScheduleTimeStamp += 86400;
+			ScheduleArray[0].flag = true;
+		}
 
-        ScheduleCount--;
-    }
+		sortSchedules();
+	}
 }
 
 void handleGetSchedules()

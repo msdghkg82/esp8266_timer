@@ -6,14 +6,22 @@
 
 #include <stdint.h>
 
-struct Schedule {
+typedef enum {
+	none = 0,
+	daily,
+	weekly,
+	monthly
+} Repeat_t;
+
+typedef struct {
 	uint16_t id;
 	uint32_t ScheduleTimeStamp;
 	uint8_t state;
+	Repeat_t interval;
 	bool flag = false;
-};
+} Schedule_t;
 
-extern Schedule ScheduleArray[50];
+extern Schedule_t ScheduleArray[50];
 
 extern uint8_t ScheduleCount;
 
