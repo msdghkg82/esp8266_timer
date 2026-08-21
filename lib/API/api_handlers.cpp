@@ -148,12 +148,13 @@ void sortSchedules()
 	);
 }
 
-void AddSchedule(uint32_t timestamp, uint8_t state, uint8_t id)
+void AddSchedule(uint32_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
 {
 	if(ScheduleCount < 50)
 	{
 		ScheduleArray[ScheduleCount].ScheduleTimeStamp = timestamp;
 		ScheduleArray[ScheduleCount].state = state;
+		ScheduleArray[ScheduleCount].interval = interval;
 		ScheduleArray[ScheduleCount].id = id;
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
@@ -177,15 +178,17 @@ void handleSchedule()
 		}
 	else
 	{
-
-		if(doc["scheduletimestamp"].is<uint32_t>() && doc["state"].is<uint8_t>() && doc["id"].is<uint16_t>())
-		{
-			AddSchedule(doc["scheduletimestamp"], doc["state"], doc["id"]);
-			server.send(200, "text/html", "<h1>schedule set</h1>");
+		if(doc["scheduletimestamp"].is<uint32_t>() && 
+		   doc["state"].is<uint8_t>() && 
+		   doc["interval"].is<uint8_t>() && 
+		   doc["id"].is<uint16_t>()
+		) {
+			AddSchedule(doc["scheduletimestamp"], doc["state"], doc["interval"], doc["id"]);
+			server.send(200, "text/html", "<h1>وظیفه تنظیم شد</h1>");
 		}
 		else
 		{
-			server.send(200, "text/html", "<h1>invalid timestamp or state</h1>");
+			server.send(200, "text/html", "<h1>invalid keys</h1>");
 		}
 	}
 }
