@@ -304,7 +304,7 @@ void handleGetSchedules()
 
     JsonArray array = doc["schedules"].to<JsonArray>();
 
-    for (uint8_t i = 0; i < ScheduleCount; i++) {
+    for (uint8_t i = 0; i < 50; i++) {
 
         JsonObject obj = array.add<JsonObject>();
 

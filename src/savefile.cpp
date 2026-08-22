@@ -5,6 +5,7 @@
 #include <RTC.h>
 
 #define SCHEDULE_FILE "/schedules.json"
+#define TMP_SCHEDULE_FILE "/schedules.tmp"
 
 bool loadSchedulesFile()
 {
@@ -69,7 +70,7 @@ bool loadSchedulesFile()
 
 bool saveSchedulesFile()
 {
-    File file = LittleFS.open(SCHEDULE_FILE, "w");
+    File file = LittleFS.open(TMP_SCHEDULE_FILE, "w");
 
     if(!file)
     {
@@ -98,14 +99,20 @@ bool saveSchedulesFile()
         schedule["flag"] = ScheduleArray[i].flag;
     }
 
-    if(serializeJson(doc, file) == 0)
+    size_t written = serializeJson(doc, file);
+
+    if(written == 0)
     {
         Serial.println("failed to write file");
         file.close();
+        LittleFS.remove(TMP_SCHEDULE_FILE);
         return false;
     }
 
+    file.flush();
     file.close();
+
+    LittleFS.rename(TMP_SCHEDULE_FILE, SCHEDULE_FILE);
 
     Serial.println("Schedules saved");
 
