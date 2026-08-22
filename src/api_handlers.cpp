@@ -209,43 +209,6 @@ void handleSchedule()
 	}
 }
 
-void ProcessSchedules()
-{
-	if(ScheduleArray[0].flag == false)
-	return;
-
-	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp)
-	return;
-
-	digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
-
-	if(ScheduleArray[0].interval == once)
-	{
-		ScheduleArray[0].flag = false;
-		ScheduleCount--;
-		sortSchedules();
-		saveSchedulesFile();
-	}
-	else if(ScheduleArray[0].interval == daily)
-	{
-		ScheduleArray[0].ScheduleTimeStamp += 86400;
-		//ScheduleArray[i].flag = true;
-		sortSchedules();
-		saveSchedulesFile();
-	}
-	else if(ScheduleArray[0].interval == weekly)
-	{
-		ScheduleArray[0].ScheduleTimeStamp += 604800;
-		//ScheduleArray[i].flag = true;
-		sortSchedules();
-		saveSchedulesFile();
-	}
-	else if(ScheduleArray[0].interval == monthly)
-	{
-		handleMonthlySchedules();
-	}
-}
-
 void handleMonthlySchedules()
 {
     time_t t = (time_t)ScheduleArray[0].ScheduleTimeStamp;
@@ -293,6 +256,43 @@ void handleMonthlySchedules()
     ScheduleArray[0].ScheduleTimeStamp = nextTs;
     sortSchedules();
 	saveSchedulesFile();
+}
+
+void ProcessSchedules()
+{
+	if(ScheduleArray[0].flag == false)
+	return;
+
+	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp)
+	return;
+
+	digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
+
+	if(ScheduleArray[0].interval == once)
+	{
+		ScheduleArray[0].flag = false;
+		ScheduleCount--;
+		sortSchedules();
+		saveSchedulesFile();
+	}
+	else if(ScheduleArray[0].interval == daily)
+	{
+		ScheduleArray[0].ScheduleTimeStamp += 86400;
+		//ScheduleArray[i].flag = true;
+		sortSchedules();
+		saveSchedulesFile();
+	}
+	else if(ScheduleArray[0].interval == weekly)
+	{
+		ScheduleArray[0].ScheduleTimeStamp += 604800;
+		//ScheduleArray[i].flag = true;
+		sortSchedules();
+		saveSchedulesFile();
+	}
+	else if(ScheduleArray[0].interval == monthly)
+	{
+		handleMonthlySchedules();
+	}
 }
 
 void handleGetSchedules()
