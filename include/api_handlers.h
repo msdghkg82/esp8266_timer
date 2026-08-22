@@ -18,6 +18,7 @@ typedef struct {
 	uint32_t ScheduleTimeStamp;
 	uint8_t state;
 	Repeat_t interval;
+	uint8_t dayOfMonth = 0;
 	bool flag = false;
 } Schedule_t;
 

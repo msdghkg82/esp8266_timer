@@ -124,7 +124,7 @@ void handleDate()
 	doc["miladi"]["minute"] = Datetime.minute;
 	doc["miladi"]["second"] = Datetime.second;
 
-	doc["shamsi"]["date"] = pd.getPersianDateStringWithNames();
+	doc["shamsi"]["date"] = pd.getFullPersianDateString();
 	doc["shamsi"]["hour"] = Datetime.hour;
 	doc["shamsi"]["minute"] = Datetime.minute;
 	doc["shamsi"]["second"] = Datetime.second;
@@ -148,6 +148,17 @@ void sortSchedules()
 	);
 }
 
+uint8_t computeDayOfMonth(uint32_t timestamp)
+{
+	time_t t = (time_t)timestamp;
+	struct tm ltm;
+	localtime_r(&t,&ltm);
+	Date shamsi = PersianDate::gregorianToPersian(
+		ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday
+	);
+	return (uint8_t)shamsi.day;
+}
+
 void AddSchedule(uint32_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
 {
 	if(ScheduleCount < 50)
@@ -155,6 +166,10 @@ void AddSchedule(uint32_t timestamp, uint8_t state, Repeat_t interval, uint16_t 
 		ScheduleArray[ScheduleCount].ScheduleTimeStamp = timestamp;
 		ScheduleArray[ScheduleCount].state = state;
 		ScheduleArray[ScheduleCount].interval = interval;
+		if(interval == monthly)
+		{
+			ScheduleArray[ScheduleCount].dayOfMonth = computeDayOfMonth(timestamp);
+		}
 		ScheduleArray[ScheduleCount].id = id;
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
@@ -206,6 +221,7 @@ void ProcessSchedules()
 	if(ScheduleArray[0].interval == once)
 	{
 		ScheduleArray[0].flag = false;
+		ScheduleCount--;
 		sortSchedules();
 	}
 	else if(ScheduleArray[0].interval == daily)
@@ -220,6 +236,58 @@ void ProcessSchedules()
 		//ScheduleArray[i].flag = true;
 		sortSchedules();
 	}
+	else if(ScheduleArray[0].interval == monthly)
+	{
+		handleMonthlySchedules();
+	}
+}
+
+void handleMonthlySchedules()
+{
+    time_t t = (time_t)ScheduleArray[0].ScheduleTimeStamp;
+    struct tm ltm;
+    localtime_r(&t, &ltm); 
+
+    int wantedDay = ScheduleArray[0].dayOfMonth; 
+    int hour      = ltm.tm_hour;
+    int minute    = ltm.tm_min;
+
+    Date jalaliNow = PersianDate::gregorianToPersian(
+        ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday
+    );
+
+    int nextMonth = jalaliNow.month;
+    int nextYear  = jalaliNow.year;
+    uint32_t nextTs;
+
+    nextMonth += 1;
+    if (nextMonth > 12) {
+        nextMonth = 1;
+        nextYear += 1;
+    }
+
+    int dim;
+    if (nextMonth <= 6) dim = 31;
+    else if (nextMonth <= 11) dim = 30;
+    else dim = PersianDate::isPersianLeapYear(nextYear) ? 30 : 29; 
+
+    int actualDay = (wantedDay <= dim) ? wantedDay : dim; 
+
+    Date greg = PersianDate::persianToGregorian(nextYear, nextMonth, actualDay);
+
+    struct tm newTm = {0};
+    newTm.tm_year  = greg.year - 1900;
+    newTm.tm_mon   = greg.month - 1;
+    newTm.tm_mday  = greg.day;
+    newTm.tm_hour  = hour;
+    newTm.tm_min   = minute;
+    newTm.tm_sec   = 0;
+    newTm.tm_isdst = -1;
+
+    nextTs = (uint32_t)mktime(&newTm);
+
+    ScheduleArray[0].ScheduleTimeStamp = nextTs;
+    sortSchedules();
 }
 
 void handleGetSchedules()
@@ -235,6 +303,10 @@ void handleGetSchedules()
         obj["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
 		obj["state"]     = ScheduleArray[i].state;
         obj["interval"]  = ScheduleArray[i].interval;
+		if(ScheduleArray[i].interval == monthly)
+		{
+			obj["dayOfMonth"] = ScheduleArray[i].dayOfMonth;
+		}
         obj["enabled"]   = ScheduleArray[i].flag;
     }
 
