@@ -84,7 +84,7 @@ bool saveSchedulesFile()
 
     JsonArray schedules = doc["schedules"].to<JsonArray>();
 
-    for(uint8_t i = 0; i < ScheduleCount; i++)
+    for(uint8_t i = 0; i < ScheduleCount + 1; i++)
     {
         JsonObject schedule = schedules.add<JsonObject>();
 

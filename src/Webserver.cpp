@@ -19,6 +19,7 @@ void WebserverConnectAPIs()
 	server.on("/api/date", HTTP_GET, handleDate);
 	server.on("/api/setschedule", HTTP_PUT, handleSchedule);
     server.on("/api/getschedules", HTTP_GET, handleGetSchedules);
+	server.on("/api/resetschedules", HTTP_GET, handleResetSchedules);
 }
 
 void WebserverSetup()
@@ -31,7 +32,7 @@ void WebserverSetup()
 	server.begin();
 	delay(100);
 	WebserverConnectAPIs();
-	Serial.printf("Server Running");
+	Serial.println("Server Running");
 }
 
 void WebserverHandleClients()

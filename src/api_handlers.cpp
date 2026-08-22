@@ -109,7 +109,6 @@ void handleTimestamp()
 
 void handleDate()
 {
-
 	updateDate();
 	pd.setGregorianDate(Datetime.year, Datetime.month, Datetime.day);
 	pd.convertGregorianToPersian();
@@ -136,7 +135,7 @@ void handleDate()
 
 void sortSchedules()
 {
-	std::sort(ScheduleArray, ScheduleArray + ScheduleCount,
+	std::sort(ScheduleArray, ScheduleArray + ScheduleCount + 1,
 			[](const Schedule_t& a, const Schedule_t& b)
 		{
 			if(a.flag != b.flag)
@@ -322,5 +321,10 @@ void handleGetSchedules()
     serializeJson(doc, response);
 
     server.send(200, "application/json", response);
+}
+
+void handleResetSchedules()
+{
+	
 }
 
