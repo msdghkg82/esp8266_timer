@@ -2,6 +2,7 @@
 
 #include <ArduinoJson.h>
 #include <api_handlers.h>
+#include <RTC.h>
 
 #define SCHEDULE_FILE "/schedules.json"
 
@@ -36,6 +37,8 @@ bool loadSchedulesFile()
         return false;
     }
 
+    systemtimestamp = doc["systemtimestamp"] | 0;
+
     JsonArray schedules = doc["schedules"].as<JsonArray>();
 
     ScheduleCount = 0;
@@ -53,7 +56,7 @@ bool loadSchedulesFile()
         {
             ScheduleArray[ScheduleCount].dayOfMonth = schedule["dayOfMonth"] | 0;
         }
-        ScheduleArray[ScheduleCount].flag = schedule["flag"] | 0;
+        ScheduleArray[ScheduleCount].flag = schedule["flag"] | false;
 
         ScheduleCount++;
     }
@@ -75,6 +78,9 @@ bool saveSchedulesFile()
     }
 
     JsonDocument doc;
+
+    doc["systemtimestamp"] = systemtimestamp;
+
     JsonArray schedules = doc["schedules"].to<JsonArray>();
 
     for(uint8_t i = 0; i < ScheduleCount; i++)
