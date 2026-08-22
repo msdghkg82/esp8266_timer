@@ -7,5 +7,6 @@
 
 bool loadSchedulesFile();
 bool saveSchedulesFile();
+bool removeFile();
 
 #endif /* SAVEFILE_H */

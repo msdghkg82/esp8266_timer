@@ -21,12 +21,12 @@ void RTC_cc()
 void updateDate()
 {
 	time_t now = time(nullptr);
-	struct tm * t{}; 
-	localtime_r(&now, t);
-	Datetime.year = t->tm_year + 1900;
-	Datetime.month = t->tm_mon + 1;
-	Datetime.day = t->tm_mday;
-	Datetime.hour = t->tm_hour;
-	Datetime.minute = t->tm_min;
-	Datetime.second = t->tm_sec;
+	struct tm t{}; 
+	localtime_r(&now, &t);
+	Datetime.year = t.tm_year + 1900;
+	Datetime.month = t.tm_mon + 1;
+	Datetime.day = t.tm_mday;
+	Datetime.hour = t.tm_hour;
+	Datetime.minute = t.tm_min;
+	Datetime.second = t.tm_sec;
 }

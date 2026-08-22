@@ -84,7 +84,7 @@ bool saveSchedulesFile()
 
     JsonArray schedules = doc["schedules"].to<JsonArray>();
 
-    for(uint8_t i = 0; i < ScheduleCount + 1; i++)
+    for(uint8_t i = 0; i < ScheduleCount; i++)
     {
         JsonObject schedule = schedules.add<JsonObject>();
 
@@ -116,5 +116,19 @@ bool saveSchedulesFile()
 
     Serial.println("Schedules saved");
 
+    return true;
+}
+
+bool removeFile()
+{
+    bool removed = LittleFS.remove(SCHEDULE_FILE);
+
+    if(removed)
+    {
+        Serial.println("failed to remove file");
+        return false;
+    }
+
+    Serial.println("file removed successfully");
     return true;
 }

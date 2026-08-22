@@ -73,7 +73,11 @@ void handleTimer()
 		{
 			LEDstate = doc["state"].as<uint8_t>();
 			timer1.once(seconds, timer1_callback);
-			server.send(200, "text/html", "<h1>تغییر وضعیت در 3 ثانیه</h1>");
+			server.send(200, "text/html", "<h1>تغییر وضعیت در " + String(seconds) + " ثانیه</h1>");
+		}
+		else
+		{
+			server.send(200, "text/html", "<h1>invalid state</h1>");
 		}
 	}
 	else
@@ -135,7 +139,7 @@ void handleDate()
 
 void sortSchedules()
 {
-	std::sort(ScheduleArray, ScheduleArray + ScheduleCount + 1,
+	std::sort(ScheduleArray, ScheduleArray + ScheduleCount,
 			[](const Schedule_t& a, const Schedule_t& b)
 		{
 			if(a.flag != b.flag)
@@ -208,7 +212,7 @@ void handleSchedule()
 	}
 }
 
-void handleMonthlySchedules()
+/* void handleMonthlySchedules()
 {
     time_t t = (time_t)ScheduleArray[0].ScheduleTimeStamp;
     struct tm ltm;
@@ -255,23 +259,77 @@ void handleMonthlySchedules()
     ScheduleArray[0].ScheduleTimeStamp = nextTs;
     sortSchedules();
 	saveSchedulesFile();
+} */
+
+void handleMonthlySchedules(Schedule_t& Schedule)
+{
+	Date shamsi;
+	Date tmp_miladi;
+	struct tm miladi;
+	time_t stamp = Schedule.ScheduleTimeStamp;
+
+	// ساختن تقویم میلادی از تایم استمپ
+	localtime_r(&stamp, &miladi);
+
+	// تبدیل تقویم میلادی به شمسی
+	shamsi = PersianDate::gregorianToPersian(miladi.tm_year,  miladi.tm_mon, miladi.tm_mday);
+
+	// پیدا کردن اینکه تسک در چه روزی از ماه قراره انجام بشه
+	Schedule.dayOfMonth = shamsi.day;
+	uint8_t tmp_dayOfMonth;
+
+	// آیا اون روز در ماه بعد وجود داره؟
+	int monthDays[12] = {31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29};
+  	if (pd.isPersianLeapYear(shamsi.year)) monthDays[11] = 30;
+
+	// اگه اون روز در ماه بعد وجود داشت
+	if(shamsi.month + 1 > 11)
+	{
+		shamsi.year += 1;
+		shamsi.month = 0;
+	}
+	else
+	{
+		shamsi.month += 1;
+	}
+
+	miladi.tm_year = tmp_miladi.year;
+	miladi.tm_mon = tmp_miladi.month;
+
+	if(Schedule.dayOfMonth <= monthDays[shamsi.month + 1])
+	{
+		tmp_dayOfMonth = monthDays[shamsi.month + 1];
+		miladi.tm_mday = tmp_dayOfMonth;
+	}
+	else
+	{
+		tmp_miladi = PersianDate::persianToGregorian(shamsi.year, shamsi.month, shamsi.day);
+		miladi.tm_mday = tmp_miladi.day;
+	}
+	
+	Schedule.ScheduleTimeStamp = (uint32_t)mktime(&miladi);
+	sortSchedules();
+	saveSchedulesFile();
 }
 
 void ProcessSchedules()
 {
+	if(ScheduleCount == 0)
+		return;
+
 	if(ScheduleArray[0].flag == false)
-	return;
+		return;
 
 	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp)
-	return;
+		return;
 
 	digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
 
 	if(ScheduleArray[0].interval == once)
 	{
 		ScheduleArray[0].flag = false;
-		ScheduleCount--;
 		sortSchedules();
+		ScheduleCount--;
 		saveSchedulesFile();
 	}
 	else if(ScheduleArray[0].interval == daily)
@@ -290,7 +348,7 @@ void ProcessSchedules()
 	}
 	else if(ScheduleArray[0].interval == monthly)
 	{
-		handleMonthlySchedules();
+		handleMonthlySchedules(ScheduleArray[0]);
 	}
 }
 
@@ -307,6 +365,7 @@ void handleGetSchedules()
 
         JsonObject obj = array.add<JsonObject>();
 
+		obj["id"]   	 = ScheduleArray[i].id;
         obj["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
 		obj["state"]     = ScheduleArray[i].state;
         obj["interval"]  = ScheduleArray[i].interval;
@@ -325,6 +384,13 @@ void handleGetSchedules()
 
 void handleResetSchedules()
 {
-	
+	for(uint8_t i = 0; i < ScheduleCount; i++)
+	{
+		ScheduleArray[i] = Schedule_t{};
+	}
+	ScheduleCount = 0;
+	//memset(ScheduleArray, 0, sizeof(ScheduleArray));
+	server.send(200, "text/html", "<h1>schedules reset</h1>");
+	//removeFile();
 }
 
