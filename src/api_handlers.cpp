@@ -10,7 +10,7 @@
 
 #include <RTC.h>
 #include <Webserver.h>
-
+#include <savefile.h>
 
 #define TehranUTC 12600
 
@@ -174,6 +174,7 @@ void AddSchedule(uint32_t timestamp, uint8_t state, Repeat_t interval, uint16_t 
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
 		sortSchedules();
+		saveSchedulesFile();
 	}
 	else
 	{
@@ -223,18 +224,21 @@ void ProcessSchedules()
 		ScheduleArray[0].flag = false;
 		ScheduleCount--;
 		sortSchedules();
+		saveSchedulesFile();
 	}
 	else if(ScheduleArray[0].interval == daily)
 	{
 		ScheduleArray[0].ScheduleTimeStamp += 86400;
 		//ScheduleArray[i].flag = true;
 		sortSchedules();
+		saveSchedulesFile();
 	}
 	else if(ScheduleArray[0].interval == weekly)
 	{
 		ScheduleArray[0].ScheduleTimeStamp += 604800;
 		//ScheduleArray[i].flag = true;
 		sortSchedules();
+		saveSchedulesFile();
 	}
 	else if(ScheduleArray[0].interval == monthly)
 	{
@@ -288,6 +292,7 @@ void handleMonthlySchedules()
 
     ScheduleArray[0].ScheduleTimeStamp = nextTs;
     sortSchedules();
+	saveSchedulesFile();
 }
 
 void handleGetSchedules()

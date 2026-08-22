@@ -2,12 +2,23 @@
 
 #include <Webserver.h>
 #include <RTC.h>
+#include <savefile.h>
 
 // put function declarations here:
 
 
 void setup() {
   // put your setup code here, to run once:
+  if(!LittleFS.begin())
+  {
+    Serial.println("LittleFS mount failed");
+  }
+  else
+  {
+    Serial.println("LittleFS mounted");
+    loadSchedulesFile();
+  }
+
   pinMode(LED_BUILTIN,OUTPUT);
   digitalWrite(LED_BUILTIN, 1);
 	RTC_setTimestamp(systemtimestamp);
