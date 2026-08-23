@@ -162,6 +162,41 @@ uint8_t computeDayOfMonth(uint32_t timestamp)
 	return (uint8_t)shamsi.day;
 }
 
+void RemoveSchedule(uint16_t id)
+{
+	for(uint8_t i = 0; i < ScheduleCount; i++)
+	{
+		if(ScheduleArray[i].id == id)
+		{
+			ScheduleArray[i].id = 0;
+			ScheduleArray[i].flag = false;
+			sortSchedules();
+			ScheduleCount--;
+			break;
+		}
+	}
+}
+
+void handleRemoveSchedule()
+{
+	JsonDocument doc;
+	DeserializationError error = deserializeJson(doc, server.arg("plain"));
+
+	if(error)
+		{
+			server.send(200, "text/html", "<h1>invalid id</h1>");
+			return;
+		}
+	else
+	{
+		if(doc["id"].is<uint16_t>())
+		{
+			RemoveSchedule(doc["id"]);
+			server.send(200, "text/html", "<h1>schedule removed</h1>");
+		}
+	}
+}
+
 void AddSchedule(uint32_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
 {
 	if(ScheduleCount < 50)
