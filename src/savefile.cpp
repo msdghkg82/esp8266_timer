@@ -4,15 +4,41 @@
 #include <api_handlers.h>
 #include <RTC.h>
 
-#define SCHEDULE_FILE "/schedules.json"
-#define TMP_SCHEDULE_FILE "/schedules.tmp"
+#define SCHEDULE_FILE       "/schedules.json"
+#define TMP_SCHEDULE_FILE   "/schedules.tmp"
+#define TIMESTAMP_FILE      "/timestamp.json"
+#define TMP_TIMESTAMP_FILE  "/timestamp.tmp"
+
+#define MAX_SCHEDULES 50
+
+
+static bool replaceFile(const char* temporaryFile, const char* destinationFile)
+{
+    if (LittleFS.exists(destinationFile) &&
+        !LittleFS.remove(destinationFile)) {
+        Serial.printf("Failed to remove %s\n", destinationFile);
+        return false;
+    }
+
+    if (!LittleFS.rename(temporaryFile, destinationFile)) {
+        Serial.printf("Failed to rename %s to %s\n",
+                      temporaryFile,
+                      destinationFile);
+
+        LittleFS.remove(temporaryFile);
+        return false;
+    }
+
+    return true;
+}
+
 
 bool loadSchedulesFile()
 {
+    ScheduleCount = 0;
+
     if (!LittleFS.exists(SCHEDULE_FILE)) {
         Serial.println("Schedule file does not exist");
-
-        ScheduleCount = 0;
         return true;
     }
 
@@ -24,40 +50,42 @@ bool loadSchedulesFile()
     }
 
     JsonDocument doc;
-
     DeserializationError error = deserializeJson(doc, file);
-
     file.close();
 
-    if (error) 
-    {
+    if (error) {
         Serial.print("Failed to parse schedule file: ");
         Serial.println(error.c_str());
-
-        ScheduleCount = 0;
         return false;
     }
 
-    systemtimestamp = doc["systemtimestamp"] | 0;
-
     JsonArray schedules = doc["schedules"].as<JsonArray>();
 
-    ScheduleCount = 0;
+    if (schedules.isNull()) {
+        Serial.println("Schedule array is missing");
+        return false;
+    }
 
     for (JsonObject schedule : schedules) {
-
-        if (ScheduleCount >= 50)
+        if (ScheduleCount >= MAX_SCHEDULES) {
+            Serial.println("Schedule limit reached");
             break;
-
-        ScheduleArray[ScheduleCount].id = schedule["id"] | 0;
-        ScheduleArray[ScheduleCount].ScheduleTimeStamp = schedule["timestamp"] | 0;
-        ScheduleArray[ScheduleCount].state = schedule["state"] | 0;
-        ScheduleArray[ScheduleCount].interval = (Repeat_t)(schedule["interval"] | 0);
-        if(ScheduleArray[ScheduleCount].interval == monthly)
-        {
-            ScheduleArray[ScheduleCount].dayOfMonth = schedule["dayOfMonth"] | 0;
         }
-        ScheduleArray[ScheduleCount].flag = schedule["flag"] | false;
+
+        ScheduleArray[ScheduleCount].id =
+            schedule["id"] | 0;
+
+        ScheduleArray[ScheduleCount].ScheduleTimeStamp =
+            schedule["timestamp"] | 0;
+
+        ScheduleArray[ScheduleCount].state =
+            schedule["state"] | 0;
+
+        ScheduleArray[ScheduleCount].interval =
+            static_cast<Repeat_t>(schedule["interval"] | 0);
+
+        ScheduleArray[ScheduleCount].flag =
+            schedule["flag"] | false;
 
         ScheduleCount++;
     }
@@ -68,67 +96,128 @@ bool loadSchedulesFile()
     return true;
 }
 
+
 bool saveSchedulesFile()
 {
     File file = LittleFS.open(TMP_SCHEDULE_FILE, "w");
 
-    if(!file)
-    {
-        Serial.println("failed to open file to write");
+    if (!file) {
+        Serial.println("Failed to open temporary schedule file");
         return false;
     }
 
     JsonDocument doc;
-
-    doc["systemtimestamp"] = systemtimestamp;
-
     JsonArray schedules = doc["schedules"].to<JsonArray>();
 
-    for(uint8_t i = 0; i < ScheduleCount; i++)
-    {
+    for (uint8_t i = 0; i < ScheduleCount && i < MAX_SCHEDULES; i++) {
         JsonObject schedule = schedules.add<JsonObject>();
 
         schedule["id"] = ScheduleArray[i].id;
         schedule["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
         schedule["state"] = ScheduleArray[i].state;
         schedule["interval"] = ScheduleArray[i].interval;
-        if(ScheduleArray[i].interval == monthly)
-        {
-            schedule["dayOfMonth"] = ScheduleArray[i].dayOfMonth;
-        }
         schedule["flag"] = ScheduleArray[i].flag;
     }
 
-    size_t written = serializeJson(doc, file);
+    const size_t written = serializeJson(doc, file);
+    file.close();
 
-    if(written == 0)
-    {
-        Serial.println("failed to write file");
-        file.close();
+    if (written == 0) {
+        Serial.println("Failed to write schedule file");
         LittleFS.remove(TMP_SCHEDULE_FILE);
         return false;
     }
 
-    file.flush();
-    file.close();
-
-    LittleFS.rename(TMP_SCHEDULE_FILE, SCHEDULE_FILE);
-
-    Serial.println("Schedules saved");
-
-    return true;
-}
-
-bool removeFile()
-{
-    bool removed = LittleFS.remove(SCHEDULE_FILE);
-
-    if(removed)
-    {
-        Serial.println("failed to remove file");
+    if (!replaceFile(TMP_SCHEDULE_FILE, SCHEDULE_FILE)) {
         return false;
     }
 
-    Serial.println("file removed successfully");
+    Serial.println("Schedules saved");
+    return true;
+}
+
+
+bool removeFile(String path)
+{
+    if (!LittleFS.exists(path)) {
+        return true;
+    }
+
+    if (!LittleFS.remove(path)) {
+        Serial.print("Failed to remove file: ");
+        Serial.println(path);
+        return false;
+    }
+
+    Serial.print("File removed: ");
+    Serial.println(path);
+    return true;
+}
+
+
+bool saveTimestamp()
+{
+    File file = LittleFS.open(TMP_TIMESTAMP_FILE, "w");
+
+    if (!file) {
+        Serial.println("Failed to open temporary timestamp file");
+        return false;
+    }
+
+    JsonDocument doc;
+    doc["systemtimestamp"] = systemtimestamp;
+
+    const size_t written = serializeJson(doc, file);
+    file.close();
+
+    if (written == 0) {
+        Serial.println("Failed to write timestamp file");
+        LittleFS.remove(TMP_TIMESTAMP_FILE);
+        return false;
+    }
+
+    if (!replaceFile(TMP_TIMESTAMP_FILE, TIMESTAMP_FILE)) {
+        return false;
+    }
+
+    Serial.println("Timestamp saved");
+    return true;
+}
+
+
+bool loadTimestamp()
+{
+    if (!LittleFS.exists(TIMESTAMP_FILE)) {
+        Serial.println("Timestamp file does not exist");
+        return true;
+    }
+
+    File file = LittleFS.open(TIMESTAMP_FILE, "r");
+
+    if (!file) {
+        Serial.println("Failed to open timestamp file");
+        return false;
+    }
+
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, file);
+    file.close();
+
+    if (error) {
+        Serial.print("Failed to parse timestamp file: ");
+        Serial.println(error.c_str());
+        return false;
+    }
+
+    if (!doc["systemtimestamp"].is<uint32_t>()) {
+        Serial.println("Invalid timestamp value");
+        return false;
+    }
+
+    systemtimestamp = doc["systemtimestamp"].as<uint32_t>();
+
+    Serial.print("Loaded timestamp: ");
+    Serial.println(systemtimestamp);
+
     return true;
 }

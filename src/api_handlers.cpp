@@ -12,6 +12,8 @@
 #include <Webserver.h>
 #include <savefile.h>
 
+#include <DateConverter.h>
+
 #define TehranUTC 12600
 
 Schedule_t ScheduleArray[50] = {0};
@@ -103,7 +105,7 @@ void handleTimestamp()
 
 		if(doc["timestamp"].is<uint32_t>())
 		{
-			systemtimestamp = doc["timestamp"].as<uint32_t>() + TehranUTC;
+			systemtimestamp = doc["timestamp"].as<uint32_t>();
 			RTC_setTimestamp(systemtimestamp);
 			updateDate();
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
@@ -114,6 +116,7 @@ void handleTimestamp()
 void handleDate()
 {
 	updateDate();
+	PersianDate pd;
 	pd.setGregorianDate(Datetime.year, Datetime.month, Datetime.day);
 	pd.convertGregorianToPersian();
 
@@ -127,6 +130,11 @@ void handleDate()
 	doc["miladi"]["minute"] = Datetime.minute;
 	doc["miladi"]["second"] = Datetime.second;
 
+	struct tm miladi{};
+	time_t stamp = time(nullptr);
+	localtime_r(&stamp, &miladi);
+	Date_ shamsi = gregorianToPersian(miladi);
+	doc["shamsi"]["date2"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
 	doc["shamsi"]["date"] = pd.getFullPersianDateString();
 	doc["shamsi"]["hour"] = Datetime.hour;
 	doc["shamsi"]["minute"] = Datetime.minute;
@@ -233,73 +241,33 @@ void handleSchedule()
 	}
 }
 
-
-
-void handleMonthlySchedules(Schedule_t& Schedule)
+uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 {
 	struct tm miladi{};
 	time_t timestamp = (time_t)Schedule.ScheduleTimeStamp;
 	localtime_r(&timestamp, &miladi);
+	Date_ shamsi = gregorianToPersian(miladi);
 
-	Serial.println("tarikh miladi ghabl az taghir");
-	Serial.println(String("/") + miladi.tm_year + String("/") + miladi.tm_mon + String("/") + miladi.tm_mday);
-
-	Date shamsi = PersianDate::gregorianToPersian(miladi.tm_year + 1900, miladi.tm_mon + 1, miladi.tm_mday);
-
-	Serial.println("tarikh ghabl az taghir");
-	Serial.println(String("/") + shamsi.year + String("/") + shamsi.month + String("/") + shamsi.day);
-
-	int monthDays[12] = {31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29};
-
-	if(Schedule.dayOfMonth == 0)
+	if(shamsi.month <= 6)
 	{
-		Schedule.dayOfMonth = shamsi.day;
-		Serial.println("dayOfMonth set to " + String(Schedule.dayOfMonth));
+		return (31 * 86400);
 	}
-
-	while (true)
-	{		
-		if(shamsi.month == 12)
+	else if(shamsi.month <= 11)
+	{
+		return (30 * 86400);
+	}
+	else if(shamsi.month == 12)
+	{
+		if(isPersianLeapYear_(shamsi.year))
 		{
-			shamsi.year++;
-			shamsi.month = 1;
+			return (30 * 86400);
 		}
 		else
 		{
-			shamsi.month++;
+			return (29 * 86400);
 		}
-
-		Serial.println("tarikh ba'd az taghir");
-		Serial.println(String("/") + shamsi.year + String("/") + shamsi.month + String("/") + shamsi.day);
-
-  		if(PersianDate::isPersianLeapYear(shamsi.year))
-		{
-			monthDays[11] = 30;
-		}
-
-		Serial.println(String("isPersianLeapYear: ") + String(PersianDate::isPersianLeapYear(shamsi.year)));
-		Serial.println("roozaye esfand");
-		Serial.println(monthDays[shamsi.month - 1]);
-
-		if(Schedule.dayOfMonth <= monthDays[shamsi.month - 1])
-			break;
 	}
-
-	Date TMPmiladi = PersianDate::persianToGregorian(shamsi.year, shamsi.month, Schedule.dayOfMonth);
-
-	Serial.println("tarikh miladi ghabl az taghir");
-	Serial.println(String("/") + TMPmiladi.year + String("/") + TMPmiladi.month + String("/") + TMPmiladi.day);
-
-	miladi.tm_year = TMPmiladi.year - 1900;
-	miladi.tm_mon = TMPmiladi.month - 1;
-	miladi.tm_mday = TMPmiladi.day;
-
-	Serial.println("tarikh miladi ba'd az taghir");
-	Serial.println(String("/") + miladi.tm_year + String("/") + miladi.tm_mon + String("/") + miladi.tm_mday);
-
-	Schedule.ScheduleTimeStamp = (uint32_t)mktime(&miladi);
-	sortSchedules();
-	saveSchedulesFile();
+	return 0;
 }
 
 void ProcessSchedules()
@@ -338,7 +306,7 @@ void ProcessSchedules()
 	}
 	else if(ScheduleArray[0].interval == monthly)
 	{
-		handleMonthlySchedules(ScheduleArray[0]);
+		ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
 	}
 }
 
@@ -359,10 +327,6 @@ void handleGetSchedules()
         obj["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
 		obj["state"]     = ScheduleArray[i].state;
         obj["interval"]  = ScheduleArray[i].interval;
-		if(ScheduleArray[i].interval == monthly)
-		{
-			obj["dayOfMonth"] = ScheduleArray[i].dayOfMonth;
-		}
         obj["enabled"]   = ScheduleArray[i].flag;
     }
 

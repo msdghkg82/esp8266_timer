@@ -7,6 +7,8 @@
 
 bool loadSchedulesFile();
 bool saveSchedulesFile();
-bool removeFile();
+bool removeFile(String path);
+bool saveTimestamp();
+bool loadTimestamp();
 
 #endif /* SAVEFILE_H */
