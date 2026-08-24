@@ -235,50 +235,6 @@ void handleSchedule()
 
 void handleMonthlySchedules(Schedule_t& Schedule)
 {
-    struct tm miladi;
-    time_t stamp = Schedule.ScheduleTimeStamp;
-
-    // ساختن تقویم میلادی از تایم‌استمپ
-    localtime_r(&stamp, &miladi);
-
-    // تبدیل تقویم میلادی به شمسی
-    Date shamsi = PersianDate::gregorianToPersian(miladi.tm_year, miladi.tm_mon, miladi.tm_mday);
-
-    // روزی از ماه که تسک قراره روش اجرا بشه (اگر قبلاً ست نشده، از تاریخ فعلی می‌گیریم)
-    uint8_t targetDay = Schedule.dayOfMonth ? Schedule.dayOfMonth : shamsi.day;
-    Schedule.dayOfMonth = targetDay;
-
-    // بردن ماه به جلو - همیشه، فارغ از تعداد روزهای ماه بعدی
-    if (shamsi.month == 11)
-    {
-        shamsi.year += 1;
-        shamsi.month = 0;
-    }
-    else
-    {
-        shamsi.month += 1;
-    }
-
-    // تعداد روزهای ماه جدید (بعد از پیشروی)
-    int monthDays[12] = {31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29};
-    if (pd.isPersianLeapYear(shamsi.year)) monthDays[11] = 30;
-
-    // اگر روز هدف توی ماه جدید وجود نداشت، به آخرین روز اون ماه محدودش کن
-    uint8_t daysInNewMonth = monthDays[shamsi.month];
-    shamsi.day = (targetDay <= daysInNewMonth) ? targetDay : daysInNewMonth;
-
-    // تبدیل تاریخ شمسی جدید به میلادی
-    Date tmp_miladi = PersianDate::persianToGregorian(shamsi.year, shamsi.month, shamsi.day);
-
-    // ساختن تایم‌استمپ جدید (ساعت/دقیقه/ثانیه‌ی قبلی از localtime_r همچنان معتبره)
-    miladi.tm_year = tmp_miladi.year;
-    miladi.tm_mon  = tmp_miladi.month;
-    miladi.tm_mday = tmp_miladi.day;
-
-    Schedule.ScheduleTimeStamp = (uint32_t)mktime(&miladi);
-
-    sortSchedules();
-    saveSchedulesFile();
 }
 
 void ProcessSchedules()
