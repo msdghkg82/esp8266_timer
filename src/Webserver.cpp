@@ -25,9 +25,6 @@ void WebserverConnectAPIs()
 
 void WebserverSetup()
 {
-	Serial.begin(115200);
-	Serial.println();
-
 	WiFi.mode(WIFI_AP);
 	WiFi.softAP(SSID, PASSWD);
 	server.begin();

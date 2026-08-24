@@ -8,6 +8,9 @@
 
 
 void setup() {
+	Serial.begin(115200);
+	Serial.println();
+  Serial.println("test");
   // put your setup code here, to run once:
   if(!LittleFS.begin())
   {

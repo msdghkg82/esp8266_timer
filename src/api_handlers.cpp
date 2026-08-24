@@ -233,23 +233,32 @@ void handleSchedule()
 	}
 }
 
+
+
 void handleMonthlySchedules(Schedule_t& Schedule)
 {
-	struct tm miladi;
-	time_t timestamp = Schedule.ScheduleTimeStamp;
+	struct tm miladi{};
+	time_t timestamp = (time_t)Schedule.ScheduleTimeStamp;
 	localtime_r(&timestamp, &miladi);
 
+	Serial.println("tarikh miladi ghabl az taghir");
+	Serial.println(String("/") + miladi.tm_year + String("/") + miladi.tm_mon + String("/") + miladi.tm_mday);
+
 	Date shamsi = PersianDate::gregorianToPersian(miladi.tm_year + 1900, miladi.tm_mon + 1, miladi.tm_mday);
+
+	Serial.println("tarikh ghabl az taghir");
+	Serial.println(String("/") + shamsi.year + String("/") + shamsi.month + String("/") + shamsi.day);
 
 	int monthDays[12] = {31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29};
 
 	if(Schedule.dayOfMonth == 0)
 	{
 		Schedule.dayOfMonth = shamsi.day;
+		Serial.println("dayOfMonth set to " + String(Schedule.dayOfMonth));
 	}
 
-	do
-	{
+	while (true)
+	{		
 		if(shamsi.month == 12)
 		{
 			shamsi.year++;
@@ -260,17 +269,35 @@ void handleMonthlySchedules(Schedule_t& Schedule)
 			shamsi.month++;
 		}
 
-		if (PersianDate::isPersianLeapYear(shamsi.year)) monthDays[11] = 30;
+		Serial.println("tarikh ba'd az taghir");
+		Serial.println(String("/") + shamsi.year + String("/") + shamsi.month + String("/") + shamsi.day);
 
-	} while (Schedule.dayOfMonth > monthDays[shamsi.month]);
+  		if(PersianDate::isPersianLeapYear(shamsi.year))
+		{
+			monthDays[11] = 30;
+		}
+
+		Serial.println(String("isPersianLeapYear: ") + String(PersianDate::isPersianLeapYear(shamsi.year)));
+		Serial.println("roozaye esfand");
+		Serial.println(monthDays[shamsi.month - 1]);
+
+		if(Schedule.dayOfMonth <= monthDays[shamsi.month - 1])
+			break;
+	}
 
 	Date TMPmiladi = PersianDate::persianToGregorian(shamsi.year, shamsi.month, Schedule.dayOfMonth);
+
+	Serial.println("tarikh miladi ghabl az taghir");
+	Serial.println(String("/") + TMPmiladi.year + String("/") + TMPmiladi.month + String("/") + TMPmiladi.day);
 
 	miladi.tm_year = TMPmiladi.year - 1900;
 	miladi.tm_mon = TMPmiladi.month - 1;
 	miladi.tm_mday = TMPmiladi.day;
 
-	Schedule.ScheduleTimeStamp = mktime(&miladi);
+	Serial.println("tarikh miladi ba'd az taghir");
+	Serial.println(String("/") + miladi.tm_year + String("/") + miladi.tm_mon + String("/") + miladi.tm_mday);
+
+	Schedule.ScheduleTimeStamp = (uint32_t)mktime(&miladi);
 	sortSchedules();
 	saveSchedulesFile();
 }
