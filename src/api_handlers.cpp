@@ -16,18 +16,15 @@
 
 #define TehranUTC 12600
 
-Schedule_t ScheduleArray[50] = {0};
+
+
+Schedule_t ScheduleArray[50] = {};
 
 uint8_t ScheduleCount = 0;
-
-
-
 
 uint8_t LEDstate = 1;
 
 Ticker timer1;
-
-
 
 PersianDate pd;
 
@@ -159,7 +156,7 @@ void sortSchedules()
 	);
 }
 
-void RemoveSchedule(uint16_t id)
+bool RemoveSchedule(uint16_t id)
 {
 	for(uint8_t i = 0; i < ScheduleCount; i++)
 	{
@@ -170,9 +167,11 @@ void RemoveSchedule(uint16_t id)
 			sortSchedules();
 			ScheduleCount--;
 			saveSchedulesFile();
-			break;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void handleRemoveSchedule()
@@ -189,8 +188,14 @@ void handleRemoveSchedule()
 	{
 		if(doc["id"].is<uint16_t>())
 		{
-			RemoveSchedule(doc["id"]);
-			server.send(200, "text/html", "<h1>schedule removed</h1>");
+			if(RemoveSchedule(doc["id"]))
+			{
+				server.send(200, "text/html", "<h1>schedule removed</h1>");
+			}
+			else
+			{
+				server.send(200, "text/html", "<h1>schedule not found</h1>");
+			}
 		}
 	}
 }
