@@ -235,6 +235,44 @@ void handleSchedule()
 
 void handleMonthlySchedules(Schedule_t& Schedule)
 {
+	struct tm miladi;
+	time_t timestamp = Schedule.ScheduleTimeStamp;
+	localtime_r(&timestamp, &miladi);
+
+	Date shamsi = PersianDate::gregorianToPersian(miladi.tm_year + 1900, miladi.tm_mon + 1, miladi.tm_mday);
+
+	int monthDays[12] = {31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29};
+
+	if(Schedule.dayOfMonth == 0)
+	{
+		Schedule.dayOfMonth = shamsi.day;
+	}
+
+	do
+	{
+		if(shamsi.month == 12)
+		{
+			shamsi.year++;
+			shamsi.month = 1;
+		}
+		else
+		{
+			shamsi.month++;
+		}
+
+		if (PersianDate::isPersianLeapYear(shamsi.year)) monthDays[11] = 30;
+
+	} while (Schedule.dayOfMonth > monthDays[shamsi.month]);
+
+	Date TMPmiladi = PersianDate::persianToGregorian(shamsi.year, shamsi.month, Schedule.dayOfMonth);
+
+	miladi.tm_year = TMPmiladi.year - 1900;
+	miladi.tm_mon = TMPmiladi.month - 1;
+	miladi.tm_mday = TMPmiladi.day;
+
+	Schedule.ScheduleTimeStamp = mktime(&miladi);
+	sortSchedules();
+	saveSchedulesFile();
 }
 
 void ProcessSchedules()
