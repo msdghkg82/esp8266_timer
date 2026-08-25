@@ -22,6 +22,7 @@ extern volatile DateTime Datetime;
 void RTC_setTimestamp(time_t timestamp);
 void RTC_cc();
 void updateDate();
+void startSavingTimestamp();
 
 
 #endif /* RTC_H_ */

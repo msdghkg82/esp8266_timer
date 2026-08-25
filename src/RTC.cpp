@@ -1,8 +1,12 @@
 #include <RTC.h>
+#include <savefile.h>
+#include <Ticker.h>
 
 volatile time_t systemtimestamp = 0;
 
 volatile DateTime Datetime;
+
+Ticker timer1;
 
 void RTC_setTimestamp(time_t timestamp)
 {
@@ -29,4 +33,14 @@ void updateDate()
 	Datetime.hour = t.tm_hour;
 	Datetime.minute = t.tm_min;
 	Datetime.second = t.tm_sec;
+}
+
+void timer1_callback()
+{
+	saveTimestamp();
+}
+
+void startSavingTimestamp()
+{
+	timer1.attach(36000, timer1_callback);
 }

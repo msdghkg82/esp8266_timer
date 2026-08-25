@@ -162,8 +162,7 @@ bool RemoveSchedule(uint16_t id)
 	{
 		if(ScheduleArray[i].id == id)
 		{
-			ScheduleArray[i].id = 0;
-			ScheduleArray[i].flag = false;
+			ScheduleArray[i] = Schedule_t{};
 			sortSchedules();
 			ScheduleCount--;
 			saveSchedulesFile();

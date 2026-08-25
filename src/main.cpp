@@ -19,12 +19,14 @@ void setup() {
   else
   {
     Serial.println("LittleFS mounted");
+    loadTimestamp();
     loadSchedulesFile();
   }
 
   pinMode(LED_BUILTIN,OUTPUT);
   digitalWrite(LED_BUILTIN, 1);
 	RTC_setTimestamp(systemtimestamp);
+  startSavingTimestamp();
 	WebserverSetup();
 }
 
