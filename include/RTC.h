@@ -8,7 +8,7 @@
 
 extern volatile time_t systemtimestamp;
 
-struct DateTime {
+struct DateTime_ {
 	int year;
 	int month;
 	int day;
@@ -17,12 +17,16 @@ struct DateTime {
 	int second;
 };
 
-extern volatile DateTime Datetime;
+extern volatile DateTime_ systemDate;
 
-void RTC_setTimestamp(time_t timestamp);
-void RTC_cc();
-void updateDate();
+void RTC_setDate(time_t timestamp);
+void UpdateDate_RTC();
+void UpdateDate_systemTS();
+void SetupSystemtimestampIncrement();
+void incrementSystemtimestamp();
+time_t get_RTC_timestamp();
 void startSavingTimestamp();
+void RTC_Begin();
 
 
 #endif /* RTC_H_ */

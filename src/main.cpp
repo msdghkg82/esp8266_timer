@@ -19,21 +19,22 @@ void setup() {
   else
   {
     Serial.println("LittleFS mounted");
-    loadTimestamp();
+    //loadTimestamp();
     loadSchedulesFile();
   }
 
   pinMode(LED_BUILTIN,OUTPUT);
   digitalWrite(LED_BUILTIN, 1);
-	RTC_setTimestamp(systemtimestamp);
+  RTC_Begin();
+	//RTC_setTimestamp(systemtimestamp);
   startSavingTimestamp();
 	WebserverSetup();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  RTC_cc();
-  updateDate();
+  //RTC_cc();
+  //updateDate();
 	WebserverHandleClients();
 }
 

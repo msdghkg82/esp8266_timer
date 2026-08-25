@@ -103,9 +103,9 @@ void handleTimestamp()
 		if(doc["timestamp"].is<uint32_t>())
 		{
 			systemtimestamp = doc["timestamp"].as<uint32_t>();
-			RTC_setTimestamp(systemtimestamp);
-			saveTimestamp();
-			updateDate();
+			RTC_setDate(systemtimestamp);
+			//saveTimestamp();
+			//UpdateDate_systemTS();
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
 		}
 	}
@@ -113,20 +113,21 @@ void handleTimestamp()
 
 void handleDate()
 {
-	updateDate();
+	UpdateDate_RTC();
+	//updateSystemDate();
 	PersianDate pd;
-	pd.setGregorianDate(Datetime.year, Datetime.month, Datetime.day);
+	pd.setGregorianDate(systemDate.year, systemDate.month, systemDate.day);
 	pd.convertGregorianToPersian();
 
 	JsonDocument doc;
-	doc["Timestamp"] = systemtimestamp;
+	doc["Timestamp"] = get_RTC_timestamp();
 
-	doc["miladi"]["year"] = Datetime.year;
-	doc["miladi"]["month"] = Datetime.month;
-	doc["miladi"]["day"] = Datetime.day;
-	doc["miladi"]["hour"] = Datetime.hour;
-	doc["miladi"]["minute"] = Datetime.minute;
-	doc["miladi"]["second"] = Datetime.second;
+	doc["miladi"]["year"] = systemDate.year;
+	doc["miladi"]["month"] = systemDate.month;
+	doc["miladi"]["day"] = systemDate.day;
+	doc["miladi"]["hour"] = systemDate.hour;
+	doc["miladi"]["minute"] = systemDate.minute;
+	doc["miladi"]["second"] = systemDate.second;
 	doc["miladi"]["date"] = pd.getGregorianDateString();
 
 	struct tm miladi{};
@@ -135,9 +136,9 @@ void handleDate()
 	Date_ shamsi = gregorianToPersian(miladi);
 	doc["shamsi"]["date2"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
 	doc["shamsi"]["date"] = pd.getFullPersianDateString();
-	doc["shamsi"]["hour"] = Datetime.hour;
-	doc["shamsi"]["minute"] = Datetime.minute;
-	doc["shamsi"]["second"] = Datetime.second;
+	doc["shamsi"]["hour"] = systemDate.hour;
+	doc["shamsi"]["minute"] = systemDate.minute;
+	doc["shamsi"]["second"] = systemDate.second;
 
 	String Datejson;
 	serializeJson(doc, Datejson);
@@ -313,6 +314,8 @@ void ProcessSchedules()
 	else if(ScheduleArray[0].interval == monthly)
 	{
 		ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
+		sortSchedules();
+		saveSchedulesFile();
 	}
 }
 

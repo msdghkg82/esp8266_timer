@@ -76,7 +76,7 @@ bool loadSchedulesFile()
             schedule["id"] | 0;
 
         ScheduleArray[ScheduleCount].ScheduleTimeStamp =
-            schedule["timestamp"] | 0;
+            schedule["scheduletimestamp"] | 0;
 
         ScheduleArray[ScheduleCount].state =
             schedule["state"] | 0;
@@ -113,7 +113,7 @@ bool saveSchedulesFile()
         JsonObject schedule = schedules.add<JsonObject>();
 
         schedule["id"] = ScheduleArray[i].id;
-        schedule["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
+        schedule["scheduletimestamp"] = ScheduleArray[i].ScheduleTimeStamp;
         schedule["state"] = ScheduleArray[i].state;
         schedule["interval"] = ScheduleArray[i].interval;
         schedule["flag"] = ScheduleArray[i].flag;
