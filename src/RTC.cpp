@@ -68,6 +68,15 @@ void startSavingTimestamp()
 void RTC_Begin()
 {
 	Wire.begin();
+	if(!rtc.begin())
+	{
+		Serial.println("RTC not found");
+		while(1);
+	}
+	else
+	{
+		Serial.println("RTC connected");
+	}
 }
 
 void SetupSystemtimestampIncrement()
