@@ -33,6 +33,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   RTC_cc();
+  updateDate();
 	WebserverHandleClients();
 }
 

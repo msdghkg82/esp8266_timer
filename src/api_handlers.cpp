@@ -104,6 +104,7 @@ void handleTimestamp()
 		{
 			systemtimestamp = doc["timestamp"].as<uint32_t>();
 			RTC_setTimestamp(systemtimestamp);
+			saveTimestamp();
 			updateDate();
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
 		}
@@ -126,6 +127,7 @@ void handleDate()
 	doc["miladi"]["hour"] = Datetime.hour;
 	doc["miladi"]["minute"] = Datetime.minute;
 	doc["miladi"]["second"] = Datetime.second;
+	doc["miladi"]["date"] = pd.getGregorianDateString();
 
 	struct tm miladi{};
 	time_t stamp = time(nullptr);

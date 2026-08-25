@@ -6,7 +6,7 @@ volatile time_t systemtimestamp = 0;
 
 volatile DateTime Datetime;
 
-Ticker timer1;
+Ticker saveTimer;
 
 void RTC_setTimestamp(time_t timestamp)
 {
@@ -24,7 +24,7 @@ void RTC_cc()
 
 void updateDate()
 {
-	time_t now = time(nullptr);
+	time_t now = systemtimestamp;
 	struct tm t{}; 
 	localtime_r(&now, &t);
 	Datetime.year = t.tm_year + 1900;
@@ -35,12 +35,12 @@ void updateDate()
 	Datetime.second = t.tm_sec;
 }
 
-void timer1_callback()
+void saveTimer_callback()
 {
 	saveTimestamp();
 }
 
 void startSavingTimestamp()
 {
-	timer1.attach(36000, timer1_callback);
+	saveTimer.attach(36000, saveTimer_callback);
 }
