@@ -10,31 +10,23 @@
 void setup() {
 	Serial.begin(115200);
 	Serial.println();
-  Serial.println("test");
-  // put your setup code here, to run once:
-  if(!LittleFS.begin())
-  {
-    Serial.println("LittleFS mount failed");
-  }
-  else
-  {
-    Serial.println("LittleFS mounted");
-    //loadTimestamp();
-    loadSchedulesFile();
-  }
+  Serial.println("Turned On");
 
+  // put your setup code here, to run once:
+
+  /* Setup built-in LED */
   pinMode(LED_BUILTIN,OUTPUT);
   digitalWrite(LED_BUILTIN, 1);
+
+  mountFile();
   RTC_Begin();
-	//RTC_setTimestamp(systemtimestamp);
-  startSavingTimestamp();
+  SetupSysTimestampIncrement();
 	WebserverSetup();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //RTC_cc();
-  //updateDate();
+  incrementSysTimestamp();
 	WebserverHandleClients();
 }
 

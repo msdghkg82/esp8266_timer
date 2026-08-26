@@ -8,11 +8,9 @@ RTC_DS1307 rtc;
 
 volatile time_t systemtimestamp = 0;
 
-volatile DateTime_ systemDate;
+volatile DateTime_t systemDate;
 
-Ticker saveTimer;
-
-void RTC_setDate(time_t timestamp)
+void RTC_SetTimestamp(time_t timestamp)
 {
 	struct tm t{};
 	time_t now = timestamp;
@@ -30,7 +28,7 @@ void RTC_setDate(time_t timestamp)
 	rtc.adjust(dt);
 }
 
-void UpdateDate_RTC()
+/* void UpdateSysDate_RTC()
 {
 	DateTime dt = rtc.now();
 
@@ -40,9 +38,9 @@ void UpdateDate_RTC()
 	systemDate.hour = dt.hour();
 	systemDate.minute = dt.minute();
 	systemDate.second = dt.second();
-}
+} */
 
-void UpdateDate_systemTS()
+void UpdateSysDate_systemTS()
 {
 	time_t now = systemtimestamp;
 	struct tm t{}; 
@@ -53,16 +51,6 @@ void UpdateDate_systemTS()
 	systemDate.hour = t.tm_hour;
 	systemDate.minute = t.tm_min;
 	systemDate.second = t.tm_sec;
-}
-
-void saveTimer_callback()
-{
-	saveTimestamp();
-}
-
-void startSavingTimestamp()
-{
-	saveTimer.attach(36000, saveTimer_callback);
 }
 
 void RTC_Begin()
@@ -79,7 +67,7 @@ void RTC_Begin()
 	}
 }
 
-void SetupSystemtimestampIncrement()
+void SetupSysTimestampIncrement()
 {
 	timeval tv;
 	tv.tv_sec = systemtimestamp;
@@ -88,7 +76,7 @@ void SetupSystemtimestampIncrement()
 	settimeofday(&tv, nullptr);
 }
 
-void incrementSystemtimestamp()
+void incrementSysTimestamp()
 {
 	systemtimestamp = time(nullptr);
 }

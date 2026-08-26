@@ -6,10 +6,30 @@
 
 #define SCHEDULE_FILE       "/schedules.json"
 #define TMP_SCHEDULE_FILE   "/schedules.tmp"
-#define TIMESTAMP_FILE      "/timestamp.json"
-#define TMP_TIMESTAMP_FILE  "/timestamp.tmp"
 
 #define MAX_SCHEDULES 50
+
+
+void mountFile()
+{
+    if(!LittleFS.begin())
+    {
+        Serial.println("LittleFS mount failed");
+    }
+    else
+    {
+        Serial.println("LittleFS mounted");
+
+        if(loadSchedulesFile())
+        {
+            Serial.println("Schedules loaded successfully");
+        }
+        else
+        {
+            Serial.println("Failed to load schedules");
+        }
+    }
+}
 
 
 static bool replaceFile(const char* temporaryFile, const char* destinationFile)
@@ -151,73 +171,5 @@ bool removeFile(String path)
 
     Serial.print("File removed: ");
     Serial.println(path);
-    return true;
-}
-
-
-bool saveTimestamp()
-{
-    File file = LittleFS.open(TMP_TIMESTAMP_FILE, "w");
-
-    if (!file) {
-        Serial.println("Failed to open temporary timestamp file");
-        return false;
-    }
-
-    JsonDocument doc;
-    doc["systemtimestamp"] = systemtimestamp;
-
-    const size_t written = serializeJson(doc, file);
-    file.close();
-
-    if (written == 0) {
-        Serial.println("Failed to write timestamp file");
-        LittleFS.remove(TMP_TIMESTAMP_FILE);
-        return false;
-    }
-
-    if (!replaceFile(TMP_TIMESTAMP_FILE, TIMESTAMP_FILE)) {
-        return false;
-    }
-
-    Serial.println("Timestamp saved");
-    return true;
-}
-
-
-bool loadTimestamp()
-{
-    if (!LittleFS.exists(TIMESTAMP_FILE)) {
-        Serial.println("Timestamp file does not exist");
-        return true;
-    }
-
-    File file = LittleFS.open(TIMESTAMP_FILE, "r");
-
-    if (!file) {
-        Serial.println("Failed to open timestamp file");
-        return false;
-    }
-
-    JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, file);
-    file.close();
-
-    if (error) {
-        Serial.print("Failed to parse timestamp file: ");
-        Serial.println(error.c_str());
-        return false;
-    }
-
-    if (!doc["systemtimestamp"].is<uint32_t>()) {
-        Serial.println("Invalid timestamp value");
-        return false;
-    }
-
-    systemtimestamp = doc["systemtimestamp"].as<uint32_t>();
-
-    Serial.print("Loaded timestamp: ");
-    Serial.println(systemtimestamp);
-
     return true;
 }

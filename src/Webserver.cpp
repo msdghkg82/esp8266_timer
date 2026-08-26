@@ -5,22 +5,22 @@
 #include <Webserver.h>
 #include <api_handlers.h>
 
-const char * SSID = "ESP";
-const char * PASSWD = "12345678";
+String SSID = "ESP";
+String PASSWD = "12345678";
 
 ESP8266WebServer server(80);
 
 void WebserverConnectAPIs()
 {
-	server.on("/", HTTP_GET, handleRoot);
-	server.on("/api/stats", HTTP_GET, handleStatus);
-	server.on("/api/timer", HTTP_PUT, handleTimer);
-	server.on("/api/timestamp", HTTP_PUT, handleTimestamp);
-	server.on("/api/date", HTTP_GET, handleDate);
-	server.on("/api/setschedule", HTTP_PUT, handleSchedule);
-    server.on("/api/getschedules", HTTP_GET, handleGetSchedules);
-	server.on("/api/resetschedules", HTTP_GET, handleResetSchedules);
-	server.on("/api/removeschedule", HTTP_PUT, handleRemoveSchedule);
+	server.on("/", HTTP_GET, handle_Root);
+	server.on("/api/stats", HTTP_GET, handle_GetStatus);
+	server.on("/api/timer", HTTP_PUT, handle_SetTimer);
+	server.on("/api/settimestamp", HTTP_PUT, handle_SetSysTimestamp);
+	server.on("/api/getdate", HTTP_GET, handle_GetDate);
+	server.on("/api/setschedule", HTTP_PUT, handle_SetSchedule);
+    server.on("/api/getschedules", HTTP_GET, handle_GetSchedules);
+	server.on("/api/resetschedules", HTTP_GET, handle_ResetSchedules);
+	server.on("/api/removeschedule", HTTP_PUT, handle_RemoveSchedule);
 }
 
 void WebserverSetup()

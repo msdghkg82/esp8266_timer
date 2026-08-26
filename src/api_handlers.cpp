@@ -1,5 +1,6 @@
 #include <api_handlers.h>
 
+/* Built-in Libraries */
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
@@ -7,19 +8,20 @@
 #include <PersianDate.h>
 #include <time.h>
 #include <algorithm>
+/**********************/
 
 #include <RTC.h>
 #include <Webserver.h>
 #include <savefile.h>
-
 #include <DateConverter.h>
 
 #define TehranUTC 12600
 
+/* Macro for changing output-pin in future */
+#define OUTPUT_PIN LED_BUILTIN
 
 
 Schedule_t ScheduleArray[50] = {};
-
 uint8_t ScheduleCount = 0;
 
 uint8_t LEDstate = 1;
@@ -31,30 +33,30 @@ PersianDate pd;
 
 
 
-void handleRoot()
+void handle_Root()
 {
 	server.send(200, "text/html", "<h1>Connected</h1>");
 }
 
-void handleStatus()
+void handle_GetStatus()
 {
-	JsonDocument json;
-	json["SSID"] = WiFi.softAPSSID();
-	json["IP"] = WiFi.softAPIP().toString();
-	json["LED State"] = !(LEDstate) ? "high" : "low";
+	JsonDocument doc;
+	doc["SSID"] = WiFi.softAPSSID();
+	doc["IP"] = WiFi.softAPIP().toString();
+	doc["LED State"] = !(LEDstate) ? "high" : "low";
 
-	String HandleRootJson;
-	serializeJson(json, HandleRootJson);
-	server.send(200, "application/json", HandleRootJson);
+	String str;
+	serializeJson(doc, str);
+	server.send(200, "application/json", str);
 }
 
 
 void timer1_callback()
 {
-	digitalWrite(LED_BUILTIN, !LEDstate);
+	digitalWrite(OUTPUT_PIN, !LEDstate);
 }
 
-void handleTimer()
+void handle_SetTimer()
 {
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
@@ -72,7 +74,7 @@ void handleTimer()
 		{
 			LEDstate = doc["state"].as<uint8_t>();
 			timer1.once(seconds, timer1_callback);
-			server.send(200, "text/html", "<h1>تغییر وضعیت در " + String(seconds) + " ثانیه</h1>");
+			server.send(200, "text/html", "<h1>changing in " + String(seconds) + " seconds</h1>");
 		}
 		else
 		{
@@ -87,40 +89,37 @@ void handleTimer()
 
 
 
-void handleTimestamp()
+void handle_SetSysTimestamp()
 {
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
-		{
-			server.send(200, "text/html", "<h1>invalid json</h1>");
-			return;
-		}
+	{
+		server.send(200, "text/html", "<h1>invalid json</h1>");
+		return;
+	}
 	else
 	{
 
-		if(doc["timestamp"].is<uint32_t>())
+		if(doc["timestamp"].is<time_t>())
 		{
-			systemtimestamp = doc["timestamp"].as<uint32_t>();
-			RTC_setDate(systemtimestamp);
-			//saveTimestamp();
-			//UpdateDate_systemTS();
+			systemtimestamp = doc["timestamp"].as<time_t>();
+			RTC_SetTimestamp(systemtimestamp);
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
 		}
 	}
 }
 
-void handleDate()
+void handle_GetDate()
 {
-	UpdateDate_RTC();
-	//updateSystemDate();
+	UpdateSysDate_systemTS();
 	PersianDate pd;
 	pd.setGregorianDate(systemDate.year, systemDate.month, systemDate.day);
 	pd.convertGregorianToPersian();
 
 	JsonDocument doc;
-	doc["Timestamp"] = get_RTC_timestamp();
+	doc["Timestamp"] = systemtimestamp;
 
 	doc["miladi"]["year"] = systemDate.year;
 	doc["miladi"]["month"] = systemDate.month;
@@ -133,16 +132,16 @@ void handleDate()
 	struct tm miladi{};
 	time_t stamp = time(nullptr);
 	localtime_r(&stamp, &miladi);
-	Date_ shamsi = gregorianToPersian(miladi);
-	doc["shamsi"]["date2"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
-	doc["shamsi"]["date"] = pd.getFullPersianDateString();
+	Date_t shamsi = gregorianToPersian(miladi);
+	doc["shamsi"]["date"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
+	doc["shamsi"]["date2"] = pd.getFullPersianDateString();
 	doc["shamsi"]["hour"] = systemDate.hour;
 	doc["shamsi"]["minute"] = systemDate.minute;
 	doc["shamsi"]["second"] = systemDate.second;
 
-	String Datejson;
-	serializeJson(doc, Datejson);
-	server.send(200, "application/json", Datejson);
+	String str;
+	serializeJson(doc, str);
+	server.send(200, "application/json", str);
 }
 
 void sortSchedules()
@@ -176,7 +175,7 @@ bool RemoveSchedule(uint16_t id)
 	return false;
 }
 
-void handleRemoveSchedule()
+void handle_RemoveSchedule()
 {
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
@@ -202,7 +201,7 @@ void handleRemoveSchedule()
 	}
 }
 
-void AddSchedule(uint32_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
+void AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
 {
 	if(ScheduleCount < 50)
 	{
@@ -221,7 +220,7 @@ void AddSchedule(uint32_t timestamp, uint8_t state, Repeat_t interval, uint16_t 
 	}
 }
 
-void handleSchedule()
+void handle_SetSchedule()
 {
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
@@ -233,13 +232,13 @@ void handleSchedule()
 		}
 	else
 	{
-		if(doc["scheduletimestamp"].is<uint32_t>() && 
+		if(doc["scheduletimestamp"].is<time_t>() && 
 		   doc["state"].is<uint8_t>() && 
-		   doc["interval"].is<uint8_t>() && 
+		   doc["interval"].is<Repeat_t>() && 
 		   doc["id"].is<uint16_t>()
 		) {
 			AddSchedule(doc["scheduletimestamp"], doc["state"], doc["interval"], doc["id"]);
-			server.send(200, "text/html", "<h1>وظیفه تنظیم شد</h1>");
+			server.send(200, "text/html", "<h1>schedule added</h1>");
 		}
 		else
 		{
@@ -251,9 +250,9 @@ void handleSchedule()
 uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 {
 	struct tm miladi{};
-	time_t timestamp = (time_t)Schedule.ScheduleTimeStamp;
+	time_t timestamp = Schedule.ScheduleTimeStamp;
 	localtime_r(&timestamp, &miladi);
-	Date_ shamsi = gregorianToPersian(miladi);
+	Date_t shamsi = gregorianToPersian(miladi);
 
 	if(shamsi.month <= 6)
 	{
@@ -288,11 +287,11 @@ void ProcessSchedules()
 	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp)
 		return;
 
-	digitalWrite(LED_BUILTIN, !ScheduleArray[0].state);
+	digitalWrite(OUTPUT_PIN, !ScheduleArray[0].state);
 
 	if(ScheduleArray[0].interval == once)
 	{
-		ScheduleArray[0].flag = false;
+		ScheduleArray[0] = Schedule_t{};
 		sortSchedules();
 		ScheduleCount--;
 		saveSchedulesFile();
@@ -300,14 +299,12 @@ void ProcessSchedules()
 	else if(ScheduleArray[0].interval == daily)
 	{
 		ScheduleArray[0].ScheduleTimeStamp += 86400;
-		//ScheduleArray[i].flag = true;
 		sortSchedules();
 		saveSchedulesFile();
 	}
 	else if(ScheduleArray[0].interval == weekly)
 	{
-		ScheduleArray[0].ScheduleTimeStamp += 604800;
-		//ScheduleArray[i].flag = true;
+		ScheduleArray[0].ScheduleTimeStamp += (7 * 86400);
 		sortSchedules();
 		saveSchedulesFile();
 	}
@@ -319,7 +316,7 @@ void ProcessSchedules()
 	}
 }
 
-void handleGetSchedules()
+void handle_GetSchedules()
 {
     JsonDocument doc;
 
@@ -339,21 +336,21 @@ void handleGetSchedules()
         obj["enabled"]   = ScheduleArray[i].flag;
     }
 
-    String response;
-    serializeJson(doc, response);
+    String str;
+    serializeJson(doc, str);
 
-    server.send(200, "application/json", response);
+    server.send(200, "application/json", str);
 }
 
-void handleResetSchedules()
+void handle_ResetSchedules()
 {
-	for(uint8_t i = 0; i < ScheduleCount; i++)
+	for(uint8_t i = 0; i < 50; i++)
 	{
 		ScheduleArray[i] = Schedule_t{};
 	}
+
 	ScheduleCount = 0;
 	server.send(200, "text/html", "<h1>schedules reset</h1>");
-	//removeFile();
 	saveSchedulesFile();
 }
 

@@ -3,7 +3,7 @@
 
 
 
-Date_ gregorianToPersian(const struct tm& date)
+Date_t gregorianToPersian(const struct tm& date)
 {
     int gy = date.tm_year + 1900;
     int gm = date.tm_mon + 1;

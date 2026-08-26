@@ -3,14 +3,13 @@
 
 
 
-struct Date_
-{
+typedef struct {
     int year;
     int month;
     int day;
-};
+} Date_t;
 
-Date_ gregorianToPersian(const struct tm& date);
+Date_t gregorianToPersian(const struct tm& date);
 bool isPersianLeapYear_(int jy);
 
 

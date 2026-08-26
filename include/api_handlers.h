@@ -5,6 +5,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <time.h>
 
 typedef enum {
 	once = 0,
@@ -15,7 +16,7 @@ typedef enum {
 
 typedef struct {
 	uint16_t id;
-	uint32_t ScheduleTimeStamp;
+	time_t ScheduleTimeStamp;
 	uint8_t state;
 	Repeat_t interval;
 	bool flag = false;
@@ -25,15 +26,15 @@ extern Schedule_t ScheduleArray[50];
 
 extern uint8_t ScheduleCount;
 
-void handleRoot();
-void handleStatus();
-void handleTimer();
-void handleTimestamp();
-void handleDate();
-void handleSchedule();
+void handle_Root();
+void handle_GetStatus();
+void handle_SetTimer();
+void handle_SetSysTimestamp();
+void handle_GetDate();
+void handle_SetSchedule();
+void handle_GetSchedules();
+void handle_ResetSchedules();
+void handle_RemoveSchedule();
 void ProcessSchedules();
-void handleGetSchedules();
-void handleResetSchedules();
-void handleRemoveSchedule();
 
 #endif /* API_HANDLERS_H_ */
