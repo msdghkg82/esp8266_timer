@@ -195,8 +195,12 @@ long gregorianToJDN(int gy, int gm, int gd)
  * irrelevant unless this runs inside a tight loop (it shouldn't —
  * call it once per date you need, e.g. at NTP sync).
  * ------------------------------------------------------------------ */
-Date_t gregorianToPersian_Claude(int gy, int gm, int gd)
+Date_t gregorianToPersian_Claude(const struct tm& date)
 {
+    int gy = date.tm_year + 1900;
+    int gm = date.tm_mon + 1;
+    int gd = date.tm_mday;
+
     long jdn = gregorianToJDN(gy, gm, gd);
     long remaining = jdn - PERSIAN_EPOCH;   /* days since 1 Farvardin, year 1 */
 

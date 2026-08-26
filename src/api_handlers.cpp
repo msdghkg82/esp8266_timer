@@ -133,7 +133,7 @@ void handle_GetDate()
 	time_t stamp = time(nullptr);
 	localtime_r(&stamp, &miladi);
 	Date_t shamsi1 = gregorianToPersian_ChatGPT(miladi);
-	Date_t shamsi2 = gregorianToPersian_Claude(miladi.tm_year + 1900, miladi.tm_mon + 1, miladi.tm_mday);
+	Date_t shamsi2 = gregorianToPersian_Claude(miladi);
 	doc["shamsi"]["date1"] = String(shamsi1.year) + "/" + String(shamsi1.month) + "/" + String(shamsi1.day);
 	doc["shamsi"]["date2"] = String(shamsi2.year) + "/" + String(shamsi2.month) + "/" + String(shamsi2.day);
 	doc["shamsi"]["date3"] = pd.getFullPersianDateString();
@@ -254,7 +254,7 @@ uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 	struct tm miladi{};
 	time_t timestamp = Schedule.ScheduleTimeStamp;
 	localtime_r(&timestamp, &miladi);
-	Date_t shamsi = gregorianToPersian_Claude(miladi.tm_year + 1900, miladi.tm_mon + 1, miladi.tm_mday);
+	Date_t shamsi = gregorianToPersian_Claude(miladi);
 
 	if(shamsi.month <= 6)
 	{
