@@ -26,6 +26,7 @@ void SetupSysTimestampIncrement();
 void incrementSysTimestamp();
 time_t get_RTC_timestamp();
 void RTC_Begin();
+void SysTS_RTC();
 
 
 #endif /* RTC_H_ */

@@ -51,7 +51,6 @@ void handle_GetStatus()
 	server.send(200, "application/json", str);
 }
 
-
 void timer1_callback()
 {
 	digitalWrite(OUTPUT_PIN, OUTPUT_STATE_2);
@@ -87,8 +86,6 @@ void handle_SetTimer()
 		server.send(200, "text/html", "<h1>invalid number of seconds</h1>");
 	}
 }
-
-
 
 void handle_SetSysTimestamp()
 {
@@ -380,4 +377,3 @@ void handle_GetSavedFile()
 
 	file.close();
 }
-

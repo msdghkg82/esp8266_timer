@@ -95,3 +95,8 @@ time_t get_RTC_timestamp()
 
 	return mktime(&t);
 }
+
+void SysTS_RTC()
+{
+	systemtimestamp = get_RTC_timestamp();
+}
