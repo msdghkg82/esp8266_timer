@@ -9,8 +9,11 @@ typedef struct {
     int day;
 } Date_t;
 
-Date_t gregorianToPersian(const struct tm& date);
-bool isPersianLeapYear_(int jy);
+Date_t gregorianToPersian_ChatGPT(const struct tm& date);
+bool isPersianLeapYear_ChatGPT(int jy);
+
+Date_t gregorianToPersian_Claude(const struct tm& date);
+bool isPersianLeapYear_Claude(int jy);
 
 
 #endif // DATECONVERTER_H

@@ -132,9 +132,11 @@ void handle_GetDate()
 	struct tm miladi{};
 	time_t stamp = time(nullptr);
 	localtime_r(&stamp, &miladi);
-	Date_t shamsi = gregorianToPersian(miladi);
-	doc["shamsi"]["date"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
-	doc["shamsi"]["date2"] = pd.getFullPersianDateString();
+	Date_t shamsi1 = gregorianToPersian_ChatGPT(miladi);
+	Date_t shamsi2 = gregorianToPersian_Claude(miladi);
+	doc["shamsi"]["date1"] = String(shamsi1.year) + "/" + String(shamsi1.month) + "/" + String(shamsi1.day);
+	doc["shamsi"]["date2"] = String(shamsi2.year) + "/" + String(shamsi2.month) + "/" + String(shamsi2.day);
+	doc["shamsi"]["date3"] = pd.getFullPersianDateString();
 	doc["shamsi"]["hour"] = systemDate.hour;
 	doc["shamsi"]["minute"] = systemDate.minute;
 	doc["shamsi"]["second"] = systemDate.second;
@@ -252,7 +254,7 @@ uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 	struct tm miladi{};
 	time_t timestamp = Schedule.ScheduleTimeStamp;
 	localtime_r(&timestamp, &miladi);
-	Date_t shamsi = gregorianToPersian(miladi);
+	Date_t shamsi = gregorianToPersian_Claude(miladi);
 
 	if(shamsi.month <= 6)
 	{
@@ -264,7 +266,7 @@ uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 	}
 	else if(shamsi.month == 12)
 	{
-		if(isPersianLeapYear_(shamsi.year))
+		if(isPersianLeapYear_Claude(shamsi.year))
 		{
 			return (30 * 86400);
 		}
