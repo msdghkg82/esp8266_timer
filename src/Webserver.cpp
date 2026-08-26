@@ -21,6 +21,7 @@ void WebserverConnectAPIs()
     server.on("/api/getschedules", HTTP_GET, handle_GetSchedules);
 	server.on("/api/resetschedules", HTTP_GET, handle_ResetSchedules);
 	server.on("/api/removeschedule", HTTP_PUT, handle_RemoveSchedule);
+	server.on("/api/getsavedfile", HTTP_GET, handle_GetSavedFile);
 }
 
 void WebserverSetup()

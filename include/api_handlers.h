@@ -35,6 +35,7 @@ void handle_SetSchedule();
 void handle_GetSchedules();
 void handle_ResetSchedules();
 void handle_RemoveSchedule();
+void handle_GetSavedFile();
 void ProcessSchedules();
 
 #endif /* API_HANDLERS_H_ */

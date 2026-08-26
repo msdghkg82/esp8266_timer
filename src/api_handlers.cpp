@@ -356,3 +356,22 @@ void handle_ResetSchedules()
 	saveSchedulesFile();
 }
 
+void handle_GetSavedFile()
+{
+	    if (!LittleFS.exists("/schedules.json")) {
+        server.send(200, "text/html", "<h1>File not found</h1>");
+        return;
+    }
+
+    File file = LittleFS.open("/schedules.json", "r");
+
+    if (!file) {
+        server.send(200, "text/html", "<h1>Failed to open file</h1>");
+        return;
+    }
+
+	server.streamFile(file, "application/json");
+
+	file.close();
+}
+
