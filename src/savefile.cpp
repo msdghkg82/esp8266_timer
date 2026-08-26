@@ -96,7 +96,7 @@ bool loadSchedulesFile()
             schedule["id"] | 0;
 
         ScheduleArray[ScheduleCount].ScheduleTimeStamp =
-            schedule["scheduletimestamp"] | 0;
+            schedule["scheduletimestamp"].as<time_t>();
 
         ScheduleArray[ScheduleCount].state =
             schedule["state"] | 0;

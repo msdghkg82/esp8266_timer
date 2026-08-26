@@ -18,8 +18,9 @@
 #define TehranUTC 12600
 
 /* Macro for changing output-pin in future */
-#define OUTPUT_PIN LED_BUILTIN
-
+#define OUTPUT_PIN    	LED_BUILTIN
+#define OUTPUT_STATE_1  (!ScheduleArray[0].state)
+#define OUTPUT_STATE_2	(!LEDstate)
 
 Schedule_t ScheduleArray[50] = {};
 uint8_t ScheduleCount = 0;
@@ -53,7 +54,7 @@ void handle_GetStatus()
 
 void timer1_callback()
 {
-	digitalWrite(OUTPUT_PIN, !LEDstate);
+	digitalWrite(OUTPUT_PIN, OUTPUT_STATE_2);
 }
 
 void handle_SetTimer()
@@ -105,8 +106,13 @@ void handle_SetSysTimestamp()
 		if(doc["timestamp"].is<time_t>())
 		{
 			systemtimestamp = doc["timestamp"].as<time_t>();
-			RTC_SetTimestamp(systemtimestamp);
+			SetupSysTimestampIncrement();
+			//RTC_SetTimestamp(systemtimestamp);
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
+		}
+		else
+		{
+			server.send(200, "text/html", "<h1>invalid timestamp</h1>");
 		}
 	}
 }
@@ -289,7 +295,7 @@ void ProcessSchedules()
 	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp)
 		return;
 
-	digitalWrite(OUTPUT_PIN, !ScheduleArray[0].state);
+	digitalWrite(OUTPUT_PIN, OUTPUT_STATE_1);
 
 	if(ScheduleArray[0].interval == once)
 	{
