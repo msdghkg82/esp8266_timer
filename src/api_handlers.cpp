@@ -206,22 +206,43 @@ void handle_RemoveSchedule()
 	}
 }
 
-void AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
+bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
 {
 	if(ScheduleCount < 50)
 	{
 		ScheduleArray[ScheduleCount].ScheduleTimeStamp = timestamp;
-		ScheduleArray[ScheduleCount].state = state;
-		ScheduleArray[ScheduleCount].interval = interval;
+
+		if(state == 0 || state == 1)
+		{
+			ScheduleArray[ScheduleCount].state = state;
+		}
+		else
+		{
+			server.send(200, "text/html", "<h1>invalid state</h1>");
+			return false;
+		}
+		
+		if(once <= interval && interval <= monthly)
+		{
+			ScheduleArray[ScheduleCount].interval = interval;
+		}
+		else
+		{
+			server.send(200, "text/html", "<h1>invalid interval</h1>");
+			return false;
+		}
+		
 		ScheduleArray[ScheduleCount].id = id;
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
 		sortSchedules();
 		saveSchedulesFile();
+		return true;
 	}
 	else
 	{
 		server.send(200, "text/html", "<h1>no space</h1>");
+		return false;
 	}
 }
 
@@ -239,11 +260,13 @@ void handle_SetSchedule()
 	{
 		if(doc["scheduletimestamp"].is<time_t>() && 
 		   doc["state"].is<uint8_t>() && 
-		   doc["interval"].is<Repeat_t>() && 
-		   doc["id"].is<uint16_t>()
-		) {
-			AddSchedule(doc["scheduletimestamp"], doc["state"], doc["interval"], doc["id"]);
-			server.send(200, "text/html", "<h1>schedule added</h1>");
+		   static_cast<Repeat_t>(doc["interval"].is<uint8_t>()) && 
+		   doc["id"].is<uint16_t>()) 
+		{
+			if(AddSchedule(doc["scheduletimestamp"], doc["state"], doc["interval"], doc["id"]))
+			{
+				server.send(200, "text/html", "<h1>schedule added</h1>");
+			}
 		}
 		else
 		{
