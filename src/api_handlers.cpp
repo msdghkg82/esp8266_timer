@@ -186,10 +186,10 @@ void handle_RemoveSchedule()
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
-		{
-			server.send(200, "text/html", "<h1>invalid id</h1>");
-			return;
-		}
+	{
+		server.send(200, "text/html", "<h1>invalid json</h1>");
+		return;
+	}
 	else
 	{
 		if(doc["id"].is<uint16_t>())
@@ -202,6 +202,10 @@ void handle_RemoveSchedule()
 			{
 				server.send(200, "text/html", "<h1>schedule not found</h1>");
 			}
+		}
+		else
+		{
+			server.send(200, "text/html", "<h1>invalid id</h1>");
 		}
 	}
 }
@@ -232,7 +236,19 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 			return false;
 		}
 		
-		ScheduleArray[ScheduleCount].id = id;
+		for(uint8_t i = 0; i < ScheduleCount; i++)
+		{
+			if(ScheduleArray[i].id == id)
+			{
+				server.send(200, "text/html", "<h1>id already exists</h1>");
+				return false;
+			}
+			else
+			{
+				ScheduleArray[ScheduleCount].id = id;
+			}
+		}
+
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
 		sortSchedules();
@@ -260,10 +276,10 @@ void handle_SetSchedule()
 	{
 		if(doc["scheduletimestamp"].is<time_t>() && 
 		   doc["state"].is<uint8_t>() && 
-		   static_cast<Repeat_t>(doc["interval"].is<uint8_t>()) && 
+		   doc["interval"].is<uint8_t>() && 
 		   doc["id"].is<uint16_t>()) 
 		{
-			if(AddSchedule(doc["scheduletimestamp"], doc["state"], doc["interval"], doc["id"]))
+			if(AddSchedule(doc["scheduletimestamp"], doc["state"], static_cast<Repeat_t>(doc["interval"]), doc["id"]))
 			{
 				server.send(200, "text/html", "<h1>schedule added</h1>");
 			}
@@ -282,25 +298,54 @@ uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 	localtime_r(&timestamp, &miladi);
 	Date_t shamsi = gregorianToPersian_Claude(miladi);
 
-	if(shamsi.month <= 6)
+	if(shamsi.day <= 29)
 	{
-		return (31 * 86400);
-	}
-	else if(shamsi.month <= 11)
-	{
-		return (30 * 86400);
-	}
-	else if(shamsi.month == 12)
-	{
-		if(isPersianLeapYear_Claude(shamsi.year))
+		if(shamsi.month <= 6)
+		{
+			return (31 * 86400);
+		}
+		else if(shamsi.month <= 11)
 		{
 			return (30 * 86400);
 		}
-		else
+		else if(shamsi.month == 12)
 		{
-			return (29 * 86400);
+			if(isPersianLeapYear_Claude(shamsi.year))
+			{
+				return (30 * 86400);
+			}
+			else
+			{
+				return (29 * 86400);
+			}
 		}
 	}
+
+	if(shamsi.day == 30)
+	{
+		if(shamsi.month == 11 && !isPersianLeapYear_Claude(shamsi.year))
+		{
+			return ((30 + 29) * 86400);
+		}
+		else
+		{
+			return (30 * 86400);
+		}
+	}
+
+	if(shamsi.day == 31)
+	{
+		if(1 <= shamsi.month && shamsi.month <= 5)
+		{
+			return (31 * 86400);
+		}
+		else if(shamsi.month == 6)
+		{
+			return ((31 + (5 * 30) + (isPersianLeapYear_Claude(shamsi.year) ? 30 : 29)) * 86400);
+		}
+	}
+
+	//for warning purposes, should never reach here
 	return 0;
 }
 
@@ -353,15 +398,15 @@ void handle_GetSchedules()
 
     JsonArray array = doc["schedules"].to<JsonArray>();
 
-    for (uint8_t i = 0; i < 50; i++) {
+    for (uint8_t i = 0; i < ScheduleCount; i++) {
 
         JsonObject obj = array.add<JsonObject>();
 
-		obj["id"]   	 = ScheduleArray[i].id;
-        obj["timestamp"] = ScheduleArray[i].ScheduleTimeStamp;
-		obj["state"]     = ScheduleArray[i].state;
-        obj["interval"]  = ScheduleArray[i].interval;
-        obj["enabled"]   = ScheduleArray[i].flag;
+		obj["id"] = ScheduleArray[i].id;
+        obj["scheduletimestamp"] = ScheduleArray[i].ScheduleTimeStamp;
+		obj["state"] = ScheduleArray[i].state;
+        obj["interval"] = ScheduleArray[i].interval;
+        obj["flag"] = ScheduleArray[i].flag;
     }
 
     String str;

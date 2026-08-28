@@ -20,11 +20,10 @@ typedef struct {
 extern volatile DateTime_t systemDate;
 
 void RTC_SetTimestamp(time_t timestamp);
-//void UpdateSysDate_RTC();
 void UpdateSysDate_systemTS();
 void SetupSysTimestampIncrement();
 void incrementSysTimestamp();
-time_t get_RTC_timestamp();
+time_t get_RTCtimestamp();
 void RTC_Begin();
 void SysTS_RTC();
 

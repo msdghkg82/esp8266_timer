@@ -28,18 +28,6 @@ void RTC_SetTimestamp(time_t timestamp)
 	rtc.adjust(dt);
 }
 
-/* void UpdateSysDate_RTC()
-{
-	DateTime dt = rtc.now();
-
-	systemDate.year = dt.year();
-	systemDate.month = dt.month();
-	systemDate.day = dt.day();
-	systemDate.hour = dt.hour();
-	systemDate.minute = dt.minute();
-	systemDate.second = dt.second();
-} */
-
 void UpdateSysDate_systemTS()
 {
 	time_t now = systemtimestamp;
@@ -81,7 +69,7 @@ void incrementSysTimestamp()
 	systemtimestamp = time(nullptr);
 }
 
-time_t get_RTC_timestamp()
+time_t get_RTCtimestamp()
 {
 	DateTime dt = rtc.now();
 
@@ -98,5 +86,5 @@ time_t get_RTC_timestamp()
 
 void SysTS_RTC()
 {
-	systemtimestamp = get_RTC_timestamp();
+	systemtimestamp = get_RTCtimestamp();
 }
