@@ -351,42 +351,63 @@ uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 
 void ProcessSchedules()
 {
-	if(ScheduleCount == 0)
-		return;
+	if(ScheduleCount == 0) return;
+	if(ScheduleArray[0].flag == false) return;
+	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp) return;
 
-	if(ScheduleArray[0].flag == false)
-		return;
+	time_t delay = systemtimestamp - ScheduleArray[0].ScheduleTimeStamp;
 
-	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp)
+	if(delay > 60)
+	{
+		switch(ScheduleArray[0].interval)
+		{
+			case once:
+				ScheduleArray[0] = Schedule_t{};
+				ScheduleCount--;
+				break;
+			case daily:
+				do{
+					ScheduleArray[0].ScheduleTimeStamp += 86400;
+				} while(ScheduleArray[0].ScheduleTimeStamp < systemtimestamp);
+				break;
+			case weekly:
+				do{
+					ScheduleArray[0].ScheduleTimeStamp += (7 * 86400);
+				} while(ScheduleArray[0].ScheduleTimeStamp < systemtimestamp);
+				break;
+			case monthly:
+				do{
+					ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
+				} while(ScheduleArray[0].ScheduleTimeStamp < systemtimestamp);
+				break;
+		}
+
+		sortSchedules();
+		saveSchedulesFile();
 		return;
+	}
 
 	digitalWrite(OUTPUT_PIN, OUTPUT_STATE_1);
 
-	if(ScheduleArray[0].interval == once)
+	switch(ScheduleArray[0].interval)
 	{
-		ScheduleArray[0] = Schedule_t{};
-		sortSchedules();
-		ScheduleCount--;
-		saveSchedulesFile();
+		case once:
+			ScheduleArray[0] = Schedule_t{};
+			ScheduleCount--;
+			break;
+		case daily:
+			ScheduleArray[0].ScheduleTimeStamp += 86400;
+			break;
+		case weekly:
+			ScheduleArray[0].ScheduleTimeStamp += (7 * 86400);
+			break;
+		case monthly:
+			ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
+			break;
 	}
-	else if(ScheduleArray[0].interval == daily)
-	{
-		ScheduleArray[0].ScheduleTimeStamp += 86400;
-		sortSchedules();
-		saveSchedulesFile();
-	}
-	else if(ScheduleArray[0].interval == weekly)
-	{
-		ScheduleArray[0].ScheduleTimeStamp += (7 * 86400);
-		sortSchedules();
-		saveSchedulesFile();
-	}
-	else if(ScheduleArray[0].interval == monthly)
-	{
-		ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
-		sortSchedules();
-		saveSchedulesFile();
-	}
+
+	sortSchedules();
+	saveSchedulesFile();
 }
 
 void handle_GetSchedules()
