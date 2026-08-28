@@ -63,7 +63,7 @@ void handle_SetTimer()
 
 	if(error)
 	{
-		server.send(200, "text/html", "<h1>invalid json</h1>");
+		server.send(400, "text/html", "<h1>invalid json</h1>");
 		return;
 	}
 
@@ -78,12 +78,12 @@ void handle_SetTimer()
 		}
 		else
 		{
-			server.send(200, "text/html", "<h1>invalid state</h1>");
+			server.send(400, "text/html", "<h1>invalid state</h1>");
 		}
 	}
 	else
 	{
-		server.send(200, "text/html", "<h1>invalid number of seconds</h1>");
+		server.send(400, "text/html", "<h1>invalid number of seconds</h1>");
 	}
 }
 
@@ -94,7 +94,7 @@ void handle_SetSysTimestamp()
 
 	if(error)
 	{
-		server.send(200, "text/html", "<h1>invalid json</h1>");
+		server.send(400, "text/html", "<h1>invalid json</h1>");
 		return;
 	}
 	else
@@ -109,7 +109,7 @@ void handle_SetSysTimestamp()
 		}
 		else
 		{
-			server.send(200, "text/html", "<h1>invalid timestamp</h1>");
+			server.send(400, "text/html", "<h1>invalid timestamp</h1>");
 		}
 	}
 }
@@ -187,7 +187,7 @@ void handle_RemoveSchedule()
 
 	if(error)
 	{
-		server.send(200, "text/html", "<h1>invalid json</h1>");
+		server.send(400, "text/html", "<h1>invalid json</h1>");
 		return;
 	}
 	else
@@ -200,12 +200,12 @@ void handle_RemoveSchedule()
 			}
 			else
 			{
-				server.send(200, "text/html", "<h1>schedule not found</h1>");
+				server.send(400, "text/html", "<h1>schedule not found</h1>");
 			}
 		}
 		else
 		{
-			server.send(200, "text/html", "<h1>invalid id</h1>");
+			server.send(400, "text/html", "<h1>invalid id</h1>");
 		}
 	}
 }
@@ -222,7 +222,7 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 		}
 		else
 		{
-			server.send(200, "text/html", "<h1>invalid state</h1>");
+			server.send(400, "text/html", "<h1>invalid state</h1>");
 			return false;
 		}
 		
@@ -232,7 +232,7 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 		}
 		else
 		{
-			server.send(200, "text/html", "<h1>invalid interval</h1>");
+			server.send(400, "text/html", "<h1>invalid interval</h1>");
 			return false;
 		}
 		
@@ -240,7 +240,7 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 		{
 			if(ScheduleArray[i].id == id)
 			{
-				server.send(200, "text/html", "<h1>id already exists</h1>");
+				server.send(400, "text/html", "<h1>id already exists</h1>");
 				return false;
 			}
 			else
@@ -257,7 +257,7 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 	}
 	else
 	{
-		server.send(200, "text/html", "<h1>no space</h1>");
+		server.send(400, "text/html", "<h1>no space</h1>");
 		return false;
 	}
 }
@@ -269,7 +269,7 @@ void handle_SetSchedule()
 
 	if(error)
 		{
-			server.send(200, "text/html", "<h1>invalid json</h1>");
+			server.send(400, "text/html", "<h1>invalid json</h1>");
 			return;
 		}
 	else
@@ -286,7 +286,7 @@ void handle_SetSchedule()
 		}
 		else
 		{
-			server.send(200, "text/html", "<h1>invalid keys</h1>");
+			server.send(400, "text/html", "<h1>invalid keys</h1>");
 		}
 	}
 }
@@ -451,14 +451,14 @@ void handle_ResetSchedules()
 void handle_GetSavedFile()
 {
 	    if (!LittleFS.exists("/schedules.json")) {
-        server.send(200, "text/html", "<h1>File not found</h1>");
+        server.send(400, "text/html", "<h1>File not found</h1>");
         return;
     }
 
     File file = LittleFS.open("/schedules.json", "r");
 
     if (!file) {
-        server.send(200, "text/html", "<h1>Failed to open file</h1>");
+        server.send(400, "text/html", "<h1>Failed to open file</h1>");
         return;
     }
 
