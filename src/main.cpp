@@ -19,9 +19,8 @@ void setup() {
   digitalWrite(LED_BUILTIN, 1);
 
   mountFile();
-  //RTC_Begin();
-  //SysTS_RTC();
-  SetupSysTimestampIncrement();
+  RTC_Begin();
+  SysTS_RTC();
 	WebserverSetup();
 }
 

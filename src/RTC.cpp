@@ -74,8 +74,8 @@ time_t get_RTCtimestamp()
 	DateTime dt = rtc.now();
 
 	struct tm t{};
-	t.tm_year = dt.year();
-	t.tm_mon = dt.month();
+	t.tm_year = dt.year() - 1900;
+	t.tm_mon = dt.month() - 1;
 	t.tm_mday = dt.day();
 	t.tm_hour = dt.hour();
 	t.tm_min = dt.minute();
@@ -87,4 +87,5 @@ time_t get_RTCtimestamp()
 void SysTS_RTC()
 {
 	systemtimestamp = get_RTCtimestamp();
+	SetupSysTimestampIncrement();
 }

@@ -59,7 +59,7 @@ bool loadSchedulesFile()
 
     if (!LittleFS.exists(SCHEDULE_FILE)) {
         Serial.println("Schedule file does not exist");
-        return true;
+        return false;
     }
 
     File file = LittleFS.open(SCHEDULE_FILE, "r");

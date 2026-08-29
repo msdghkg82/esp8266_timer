@@ -18,7 +18,8 @@
 #define TehranUTC 12600
 
 /* Macro for changing output-pin in future */
-#define OUTPUT_PIN    	LED_BUILTIN
+#define RELAY_PIN    	14
+//#define OUTPUT_PIN    	LED_BUILTIN
 #define OUTPUT_STATE_1  (!ScheduleArray[0].state)
 #define OUTPUT_STATE_2	(!LEDstate)
 
@@ -53,7 +54,7 @@ void handle_GetStatus()
 
 void timer1_callback()
 {
-	digitalWrite(OUTPUT_PIN, OUTPUT_STATE_2);
+	digitalWrite(RELAY_PIN, OUTPUT_STATE_2);
 }
 
 void handle_SetTimer()
@@ -102,9 +103,8 @@ void handle_SetSysTimestamp()
 
 		if(doc["timestamp"].is<time_t>())
 		{
-			systemtimestamp = doc["timestamp"].as<time_t>();
-			SetupSysTimestampIncrement();
-			//RTC_SetTimestamp(systemtimestamp);
+			RTC_SetTimestamp(doc["timestamp"].as<time_t>());
+			SysTS_RTC();
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
 		}
 		else
@@ -357,7 +357,7 @@ void ProcessSchedules()
 
 	time_t delay = systemtimestamp - ScheduleArray[0].ScheduleTimeStamp;
 
-	if(delay > 60)
+/*	if(delay > 60)
 	{
 		switch(ScheduleArray[0].interval)
 		{
@@ -385,9 +385,9 @@ void ProcessSchedules()
 		sortSchedules();
 		saveSchedulesFile();
 		return;
-	}
+	} */
 
-	digitalWrite(OUTPUT_PIN, OUTPUT_STATE_1);
+	digitalWrite(RELAY_PIN, OUTPUT_STATE_1);
 
 	switch(ScheduleArray[0].interval)
 	{
