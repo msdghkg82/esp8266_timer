@@ -56,14 +56,13 @@ void handle_SetTimer()
 		return;
 	}
 
-	if(doc["seconds"].is<float_t>())
+	if(doc["seconds"].is<float_t>() && doc["state"].is<uint8_t>())
 	{
-		float seconds = doc["seconds"].as<float_t>();
-		if(doc["state"].is<uint8_t>())
+		if(doc["state"] == 0 || doc["state"] == 1)
 		{
 			LEDstate = doc["state"].as<uint8_t>();
-			timer1.once(seconds, timer1_callback);
-			server.send(200, "text/html", "<h1>changing in " + String(seconds) + " seconds</h1>");
+			timer1.once(doc["seconds"].as<float_t>(), timer1_callback);
+			server.send(200, "text/html", "<h1>changing in " + String(doc["seconds"].as<float_t>()) + " seconds</h1>");
 		}
 		else
 		{
@@ -72,7 +71,7 @@ void handle_SetTimer()
 	}
 	else
 	{
-		server.send(400, "text/html", "<h1>invalid number of seconds</h1>");
+		server.send(400, "text/html", "<h1>invalid keys</h1>");
 	}
 }
 
@@ -88,7 +87,6 @@ void handle_SetSysTimestamp()
 	}
 	else
 	{
-
 		if(doc["timestamp"].is<time_t>())
 		{
 			RTC_SetTimestamp(doc["timestamp"].as<time_t>());
@@ -116,7 +114,6 @@ void handle_GetDate()
 	doc["miladi"]["minute"] = systemDate.minute;
 	doc["miladi"]["second"] = systemDate.second;
 	doc["miladi"]["date"] = String(systemDate.year) + "/" + String(systemDate.month) + "/" + String(systemDate.day);
-
 
 	Date_t shamsi1 = gregorianToPersian_ChatGPT(systemDate.year, systemDate.month, systemDate.day);
 	Date_t shamsi2 = gregorianToPersian_Claude(systemDate.year, systemDate.month, systemDate.day);
