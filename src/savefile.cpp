@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 #include <api_handlers.h>
 #include <RTC.h>
+#include <scheduler.h>
 
 #define SCHEDULE_FILE       "/schedules.json"
 #define TMP_SCHEDULE_FILE   "/schedules.tmp"

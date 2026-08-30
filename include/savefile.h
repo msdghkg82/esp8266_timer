@@ -5,6 +5,8 @@
 
 #include <LittleFS.h>
 
+#define SCHEDULE_FILE "/schedules.json"
+
 void mountFile();
 bool loadSchedulesFile();
 bool saveSchedulesFile();

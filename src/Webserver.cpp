@@ -4,6 +4,7 @@
 
 #include <Webserver.h>
 #include <api_handlers.h>
+#include <scheduler.h>
 
 String SSID = "ESP";
 String PASSWD = "12345678";
