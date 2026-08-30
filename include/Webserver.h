@@ -8,8 +8,6 @@
 
 extern ESP8266WebServer server;
 
-void WebserverConnectAPIs();
-
 void WebserverSetup();
 
 void WebserverHandleClients();

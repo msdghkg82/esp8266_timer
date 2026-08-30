@@ -4,9 +4,10 @@
 #include <api_handlers.h>
 #include <RTC.h>
 #include <scheduler.h>
+#include <wifi.h>
 
-#define SCHEDULE_FILE       "/schedules.json"
 #define TMP_SCHEDULE_FILE   "/schedules.tmp"
+#define TMP_WIFICONFIG_FILE  "/wificonfig.tmp"
 
 #define MAX_SCHEDULES 50
 
@@ -28,6 +29,15 @@ void mountFile()
         else
         {
             Serial.println("Failed to load schedules");
+        }
+
+        if(loadWifiConfig())
+        {
+            Serial.println("WifiConfig loaded successfully");
+        }
+        else
+        {
+            Serial.println("Failed to load WifiConfig");
         }
     }
 }
@@ -158,6 +168,67 @@ bool saveSchedulesFile()
     return true;
 }
 
+bool saveWifiConfig()
+{
+    File file = LittleFS.open(TMP_WIFICONFIG_FILE, "w");
+    if (!file) {
+        Serial.println("Failed to open temporary wificonfig file");
+        return false;
+    }
+
+    JsonDocument doc;
+    doc["ssid"] = SSID;
+    doc["passwd"] = PASSWD;
+
+    const size_t written = serializeJson(doc, file);
+    file.close();
+
+    if (written == 0) {
+        Serial.println("Failed to write wificonfig file");
+        LittleFS.remove(TMP_WIFICONFIG_FILE);
+        return false;
+    }
+
+    if (!replaceFile(TMP_WIFICONFIG_FILE, WIFICONFIG_FILE)) {
+        return false;
+    }
+
+    Serial.println("wificonfig saved");
+    return true;
+}
+
+bool loadWifiConfig()
+{
+    if(!LittleFS.exists(WIFICONFIG_FILE)) 
+    {
+        Serial.println("wificonfig file does not exist");
+        return false;
+    }
+
+    File file = LittleFS.open(WIFICONFIG_FILE, "r");
+
+    if(!file) 
+    {
+        Serial.println("Failed to open wificonfig file");
+        return false;
+    }
+
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, file);
+    file.close();
+
+    if(error) 
+    {
+        Serial.print("Failed to parse wificonfig file: ");
+        Serial.println(error.c_str());
+        return false;
+    }
+
+    SSID = doc["ssid"];
+    PASSWD = doc["passwd"];
+
+    return true;
+}
 
 bool removeFile(String path)
 {

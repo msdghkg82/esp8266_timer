@@ -4,10 +4,7 @@
 
 #include <Webserver.h>
 #include <api_handlers.h>
-#include <scheduler.h>
-
-String SSID = "ESP";
-String PASSWD = "12345678";
+#include <wifi.h>
 
 ESP8266WebServer server(80);
 
@@ -28,8 +25,7 @@ void WebserverConnectAPIs()
 
 void WebserverSetup()
 {
-	WiFi.mode(WIFI_AP);
-	WiFi.softAP(SSID, PASSWD);
+	wifi_setup();
 	server.begin();
 	delay(100);
 	WebserverConnectAPIs();
@@ -39,5 +35,4 @@ void WebserverSetup()
 void WebserverHandleClients()
 {
 	server.handleClient();
-	ProcessSchedules();
 }

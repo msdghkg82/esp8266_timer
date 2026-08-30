@@ -14,12 +14,11 @@
 #include <savefile.h>
 #include <DateConverter.h>
 #include <scheduler.h>
+#include <wifi.h>
 
 
 #define TehranUTC 12600
 
-String SSID;
-String PSWD;
 uint8_t LEDstate = 1;
 Ticker timer1;
 Ticker timer2;
@@ -251,11 +250,6 @@ void handle_GetSavedFile()
 	file.close();
 }
 
-void timer2_callback()
-{
-	WiFi.softAP(SSID.c_str(), PSWD.c_str());
-}
-
 void handle_wifisetting()
 {
 	JsonDocument doc;
@@ -269,10 +263,16 @@ void handle_wifisetting()
 	{
 		if(doc["ssid"].is<String>() && doc["passwd"].is<String>())
 		{
-			SSID = doc["ssid"].as<String>();
-			PSWD = doc["passwd"].as<String>();
-			server.send(200, "text/html", "<h1>changes effect in 3 seconds</h1>");
-			timer2.once(3.f , timer2_callback);
+			SSID = doc["ssid"];
+			PASSWD = doc["passwd"];
+			if(saveWifiConfig())
+			{
+				server.send(200, "text/html", "<h1>changes takes effect after reset</h1>");
+			}
+			else
+			{
+				server.send(400, "text/html", "<h1>error</h1>");
+			}
 		}
 		else
 		{

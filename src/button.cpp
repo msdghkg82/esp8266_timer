@@ -4,7 +4,7 @@
 
 #include <scheduler.h>
 #include <RTC.h>
-
+#include <savefile.h>
 
 #define BUTTON_PIN 20
 
@@ -51,6 +51,8 @@ void ButtonTask()
         {
             Serial.println("20 second press");
             ResetSchedules();
+            removeFile(SCHEDULE_FILE);
+            //removeFile(WIFICONFIG_FILE);
             systemtimestamp = 0;
         }
         else if(pressDuration >= 10000)

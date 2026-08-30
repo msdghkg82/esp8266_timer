@@ -3,6 +3,7 @@
 #include <Webserver.h>
 #include <RTC.h>
 #include <savefile.h>
+#include <scheduler.h>
 
 // put function declarations here:
 
@@ -19,8 +20,8 @@ void setup() {
   digitalWrite(LED_BUILTIN, 1);
 
   mountFile();
-  RTC_Begin();
-  SysTS_RTC();
+  //RTC_Begin();
+  //SysTS_RTC();
 	WebserverSetup();
 }
 
@@ -28,6 +29,7 @@ void loop() {
   // put your main code here, to run repeatedly:
   incrementSysTimestamp();
 	WebserverHandleClients();
+  ProcessSchedules();
 }
 
 // put function definitions here:
