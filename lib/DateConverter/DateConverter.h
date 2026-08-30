@@ -3,11 +3,11 @@
 
 
 
-typedef struct Date_t{
+typedef struct{
     int year;
     int month;
     int day;
-};
+} Date_t;
 
 Date_t gregorianToPersian_ChatGPT(int gy, int gm, int gd);
 bool isPersianLeapYear_ChatGPT(int jy);

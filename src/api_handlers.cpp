@@ -18,9 +18,11 @@
 
 #define TehranUTC 12600
 
-
+String SSID;
+String PSWD;
 uint8_t LEDstate = 1;
 Ticker timer1;
+Ticker timer2;
 
 
 void handle_Root()
@@ -162,7 +164,6 @@ void handle_SetSchedule()
 {
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
-
 	if(error)
 		{
 			server.send(400, "text/html", "<h1>invalid json</h1>");
@@ -248,4 +249,34 @@ void handle_GetSavedFile()
 	server.streamFile(file, "application/json");
 
 	file.close();
+}
+
+void timer2_callback()
+{
+	WiFi.softAP(SSID.c_str(), PSWD.c_str());
+}
+
+void handle_wifisetting()
+{
+	JsonDocument doc;
+	DeserializationError error = deserializeJson(doc, server.arg("plain"));
+	if(error)
+	{
+		server.send(400, "text/html", "<h1>invalid json</h1>");
+		return;
+	}
+	else
+	{
+		if(doc["ssid"].is<String>() && doc["passwd"].is<String>())
+		{
+			SSID = doc["ssid"].as<String>();
+			PSWD = doc["passwd"].as<String>();
+			server.send(200, "text/html", "<h1>changes effect in 3 seconds</h1>");
+			timer2.once(3.f , timer2_callback);
+		}
+		else
+		{
+			server.send(400, "text/html", "<h1>invalid keys</h1>");
+		}
+	}
 }

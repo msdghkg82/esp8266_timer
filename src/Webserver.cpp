@@ -23,6 +23,7 @@ void WebserverConnectAPIs()
 	server.on("/api/resetschedules", HTTP_GET, handle_ResetSchedules);
 	server.on("/api/removeschedule", HTTP_PUT, handle_RemoveSchedule);
 	server.on("/api/getsavedfile", HTTP_GET, handle_GetSavedFile);
+	server.on("/api/wifisetting", HTTP_PUT, handle_wifisetting);
 }
 
 void WebserverSetup()

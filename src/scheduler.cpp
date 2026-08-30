@@ -162,8 +162,6 @@ void ProcessSchedules()
 	if(ScheduleArray[0].flag == false) return;
 	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp) return;
 
-	time_t delay = systemtimestamp - ScheduleArray[0].ScheduleTimeStamp;
-
 	digitalWrite(RELAY_PIN, OUTPUT_STATE_1);
 
 	switch(ScheduleArray[0].interval)
