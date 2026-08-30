@@ -3,11 +3,19 @@
 #include <ESP8266WiFi.h>
 #include <savefile.h>
 
-const char * SSID;// = "ESP";
-const char * PASSWD;// = "12345678";
+
+String SSID = "ESP";
+String PASSWD = "12345678";
 
 void wifi_setup()
 {
     WiFi.mode(WIFI_AP);
-	WiFi.softAP(SSID, PASSWD);
+	WiFi.softAP(SSID.c_str(), PASSWD.c_str());
+}
+
+void wifi_off()
+{
+    WiFi.softAPdisconnect(true);
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
 }

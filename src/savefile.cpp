@@ -12,7 +12,7 @@
 #define MAX_SCHEDULES 50
 
 
-void mountFile()
+void LoadFiles()
 {
     if(!LittleFS.begin())
     {
@@ -224,8 +224,8 @@ bool loadWifiConfig()
         return false;
     }
 
-    SSID = doc["ssid"];
-    PASSWD = doc["passwd"];
+    SSID = doc["ssid"].as<String>();
+    PASSWD = doc["passwd"].as<String>();
 
     return true;
 }

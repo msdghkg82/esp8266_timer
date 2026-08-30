@@ -1,12 +1,12 @@
 #include <button.h>
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
 
 #include <scheduler.h>
 #include <RTC.h>
 #include <savefile.h>
+#include <wifi.h>
 
-#define BUTTON_PIN 20
+#define BUTTON_PIN 12
 
 volatile uint32_t pressStartTime = 0;
 volatile uint32_t pressDuration = 0;
@@ -52,13 +52,13 @@ void ButtonTask()
             Serial.println("20 second press");
             ResetSchedules();
             removeFile(SCHEDULE_FILE);
-            //removeFile(WIFICONFIG_FILE);
+            removeFile(WIFICONFIG_FILE);
             systemtimestamp = 0;
         }
         else if(pressDuration >= 10000)
         {
             Serial.println("10 second press");
-            WiFi.mode(WIFI_OFF);
+            wifi_off();
         }
         else
         {

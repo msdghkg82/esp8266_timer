@@ -1,9 +1,14 @@
 #ifndef WIFI_H_
 #define WIFI_H
 
-extern const char * SSID;
-extern const char * PASSWD;
+#pragma once
+
+#include <WString.h>
+
+extern String SSID;
+extern String PASSWD;
 
 void wifi_setup();
+void wifi_off();
 
 #endif /* WIFI_H */

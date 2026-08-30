@@ -4,6 +4,7 @@
 #include <RTC.h>
 #include <savefile.h>
 #include <scheduler.h>
+#include <button.h>
 
 // put function declarations here:
 
@@ -19,10 +20,11 @@ void setup() {
   pinMode(LED_BUILTIN,OUTPUT);
   digitalWrite(LED_BUILTIN, 1);
 
-  mountFile();
+  LoadFiles();
   //RTC_Begin();
   //SysTS_RTC();
 	WebserverSetup();
+  ButtonInit();
 }
 
 void loop() {
@@ -30,6 +32,7 @@ void loop() {
   incrementSysTimestamp();
 	WebserverHandleClients();
   ProcessSchedules();
+  ButtonTask();
 }
 
 // put function definitions here:
