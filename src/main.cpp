@@ -21,8 +21,8 @@ void setup() {
   digitalWrite(LED_BUILTIN, 1);
 
   LoadFiles();
-  //RTC_Begin();
-  //SysTS_RTC();
+  RTC_Begin();
+  SysTS_RTC();
 	WebserverSetup();
   ButtonInit();
 }
