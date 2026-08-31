@@ -1,11 +1,6 @@
 #ifndef API_HANDLERS_H_
 #define API_HANDLERS_H_
 
-#pragma once
-#include <stdint.h>
-
-extern uint8_t RelayState;
-
 void handle_Root();
 void handle_GetStatus();
 void handle_SetTimer();

@@ -5,7 +5,6 @@
 #include <DateConverter.h>
 #include <RTC.h>
 #include <algorithm>
-#include <api_handlers.h>
 
 Schedule_t ScheduleArray[50] = {};
 uint8_t ScheduleCount = 0;
@@ -158,8 +157,7 @@ void ProcessSchedules()
 	if(ScheduleArray[0].flag == false) return;
 	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp) return;
 
-	RelayState = ScheduleArray[0].state;
-	digitalWrite(RELAY_PIN, RelayState);
+	digitalWrite(RELAY_PIN, ScheduleArray[0].state);
 
 	switch(ScheduleArray[0].interval)
 	{

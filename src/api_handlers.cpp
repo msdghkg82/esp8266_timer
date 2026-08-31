@@ -18,10 +18,9 @@
 
 #define TehranUTC 12600
 
-
+uint8_t RelayState;
 Ticker timer1;
 Ticker timer2;
-uint8_t RelayState = 0;
 
 void handle_Root()
 {
@@ -33,6 +32,15 @@ void handle_GetStatus()
 	JsonDocument doc;
 	doc["SSID"] = WiFi.softAPSSID();
 	doc["IP"] = WiFi.softAPIP().toString();
+	if(WiFi.getMode() == WIFI_OFF)
+	{
+		doc["wifi"] = "wifi off";
+	}
+	else if (WiFi.getMode() == WIFI_AP)
+	{
+		doc["wifi"] = "wifi on";
+	}
+	
 	doc["Relay State"] = (digitalRead(RELAY_PIN)) ? "high" : "low";
 
 	String str;
