@@ -20,6 +20,7 @@
 
 
 Ticker timer1;
+Ticker timer2;
 uint8_t RelayState = 0;
 
 void handle_Root()
@@ -279,9 +280,14 @@ void handle_wifisetting()
 	}
 }
 
+void timer2_callback()
+{
+	wifi_off();
+}
+
 void handle_wifioff()
 {
 	
-	wifi_off();
-	server.send(200, "text/html", "<h1>wifi turned off</h1>");
+	timer2.attach(5.f, timer2_callback);
+	server.send(200, "text/html", "<h1>wifi turning off in 5 seconds</h1>");
 }
