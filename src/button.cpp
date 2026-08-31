@@ -62,7 +62,7 @@ void ButtonTask()
             setLEDInterval(100); // Set LED blink interval to 100 ms
             resetLEDInterval();
         }
-        else if(pressDuration >= 10000)
+        else if(pressDuration >= 10000 && pressDuration <= 15000)
         {
             Serial.println("10 second press");
             removeFile(WIFICONFIG_FILE);
