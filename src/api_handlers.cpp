@@ -229,26 +229,6 @@ void handle_ResetSchedules()
 	
 }
 
-void handle_GetSavedFile()
-{
-	if (!LittleFS.exists(SCHEDULE_FILE)) 
-	{
-        server.send(400, "text/html", "<h1>File not found</h1>");
-        return;
-    }
-
-    File file = LittleFS.open(SCHEDULE_FILE, "r");
-
-    if (!file) {
-        server.send(400, "text/html", "<h1>Failed to open file</h1>");
-        return;
-    }
-
-	server.streamFile(file, "application/json");
-
-	file.close();
-}
-
 void handle_wifisetting()
 {
 	JsonDocument doc;

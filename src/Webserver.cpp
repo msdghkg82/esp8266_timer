@@ -19,7 +19,6 @@ void WebserverConnectAPIs()
     server.on("/api/getschedules", HTTP_GET, handle_GetSchedules);
 	server.on("/api/resetschedules", HTTP_PUT, handle_ResetSchedules);
 	server.on("/api/removeschedule", HTTP_PUT, handle_RemoveSchedule);
-	server.on("/api/getsavedfile", HTTP_GET, handle_GetSavedFile);
 	server.on("/api/wifisetting", HTTP_PUT, handle_wifisetting);
 	server.on("/api/wifioff", HTTP_PUT, handle_wifioff);
 }
