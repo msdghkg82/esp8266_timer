@@ -242,8 +242,16 @@ void handle_wifisetting()
 	{
 		if(doc["ssid"].is<String>() && doc["passwd"].is<String>())
 		{
+			if(doc["ssid"].as<String>().length() > 32 || (doc["passwd"].as<String>().length() > 64 
+													   && doc["passwd"].as<String>().length() < 8))
+			{
+				server.send(400, "text/html", "<h1>invalid ssid or password length</h1>");
+				return;
+			}
+
 			SSID = doc["ssid"].as<String>();
 			PASSWD = doc["passwd"].as<String>();
+			
 			if(saveWifiConfig())
 			{
 				server.send(200, "text/html", "<h1>changes takes effect after reset</h1>");
