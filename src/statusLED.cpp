@@ -1,0 +1,35 @@
+#include <statusLED.h>
+#include <Arduino.h>
+#include <Ticker.h>
+
+Ticker ledTicker;
+Ticker ledTicker2;
+
+
+void ledTicker1_callback()
+{
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Toggle the LED state
+}
+
+void ledTicker2_callback()
+{
+    setLEDInterval(1000);
+}
+
+void statusLED_Init()
+{
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH); // Turn off the LED (assuming active low)
+    ledTicker.attach_ms(1000, ledTicker1_callback); // Start the ticker with a default interval of 1 second
+}
+
+void setLEDInterval(uint32_t interval)
+{
+    ledTicker.detach(); // Stop the current ticker
+    ledTicker.attach_ms(interval, ledTicker1_callback); // Start a new ticker with the updated interval
+}
+
+void resetLEDInterval()
+{
+    ledTicker2.once(10.f, ledTicker2_callback);
+}

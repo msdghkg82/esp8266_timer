@@ -12,7 +12,7 @@ void WebserverConnectAPIs()
 {
 	server.on("/", HTTP_GET, handle_Root);
 	server.on("/api/stats", HTTP_GET, handle_GetStatus);
-	server.on("/api/timer", HTTP_PUT, handle_SetTimer);
+	server.on("/api/settimer", HTTP_PUT, handle_SetTimer);
 	server.on("/api/settimestamp", HTTP_PUT, handle_SetSysTimestamp);
 	server.on("/api/getdate", HTTP_GET, handle_GetDate);
 	server.on("/api/setschedule", HTTP_PUT, handle_SetSchedule);
@@ -21,6 +21,7 @@ void WebserverConnectAPIs()
 	server.on("/api/removeschedule", HTTP_PUT, handle_RemoveSchedule);
 	server.on("/api/getsavedfile", HTTP_GET, handle_GetSavedFile);
 	server.on("/api/wifisetting", HTTP_PUT, handle_wifisetting);
+	server.on("/api/wifioff", HTTP_GET, handle_wifioff);
 }
 
 void WebserverSetup()

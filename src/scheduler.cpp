@@ -4,12 +4,8 @@
 #include <savefile.h>
 #include <DateConverter.h>
 #include <RTC.h>
-
-/* Macro for changing output-pin in future */
-#define RELAY_PIN    	14
-//#define OUTPUT_PIN    	LED_BUILTIN
-#define OUTPUT_STATE_1  (!ScheduleArray[0].state)
-
+#include <algorithm>
+#include <api_handlers.h>
 
 Schedule_t ScheduleArray[50] = {};
 uint8_t ScheduleCount = 0;
@@ -162,7 +158,8 @@ void ProcessSchedules()
 	if(ScheduleArray[0].flag == false) return;
 	if(ScheduleArray[0].ScheduleTimeStamp > systemtimestamp) return;
 
-	digitalWrite(RELAY_PIN, OUTPUT_STATE_1);
+	RelayState = ScheduleArray[0].state;
+	digitalWrite(RELAY_PIN, RelayState);
 
 	switch(ScheduleArray[0].interval)
 	{
@@ -183,4 +180,10 @@ void ProcessSchedules()
 
 	sortSchedules();
 	saveSchedulesFile();
+}
+
+void Scheduler_Init()
+{
+	pinMode(RELAY_PIN, OUTPUT);
+	digitalWrite(RELAY_PIN, LOW);
 }

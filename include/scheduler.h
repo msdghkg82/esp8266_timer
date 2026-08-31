@@ -3,8 +3,11 @@
 
 
 #pragma once
+
 #include <stdint.h>
 #include <time.h>
+
+#define RELAY_PIN 14
 
 typedef enum {
 	once = 0,
@@ -28,6 +31,7 @@ bool RemoveSchedule(uint16_t id);
 bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id);
 bool ResetSchedules();
 void ProcessSchedules();
+void Scheduler_Init();
 
 
 #endif /* SCHEDULER_H_ */

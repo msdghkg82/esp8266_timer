@@ -5,6 +5,7 @@
 #include <RTC.h>
 #include <savefile.h>
 #include <wifi.h>
+#include <statusLED.h>
 
 #define BUTTON_PIN 12
 
@@ -47,18 +48,26 @@ void ButtonTask()
     {
         buttonReleased = false;
 
-        if(pressDuration >= 20000)
+        if(pressDuration < 500)
+        {
+            Serial.println("Noise");
+            return; // Ignore short presses
+        }
+        else if(pressDuration >= 20000)
         {
             Serial.println("20 second press");
             ResetSchedules();
             removeFile(SCHEDULE_FILE);
-            removeFile(WIFICONFIG_FILE);
             systemtimestamp = 0;
+            setLEDInterval(100); // Set LED blink interval to 100 ms
+            resetLEDInterval();
         }
         else if(pressDuration >= 10000)
         {
             Serial.println("10 second press");
-            wifi_off();
+            removeFile(WIFICONFIG_FILE);
+            setLEDInterval(300); // Set LED blink interval to 300 ms
+            resetLEDInterval();
         }
         else
         {

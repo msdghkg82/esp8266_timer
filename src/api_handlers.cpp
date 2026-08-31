@@ -6,7 +6,6 @@
 #include <ArduinoJson.h>
 #include <Ticker.h>
 #include <time.h>
-#include <algorithm>
 /**********************/
 
 #include <RTC.h>
@@ -19,10 +18,9 @@
 
 #define TehranUTC 12600
 
-uint8_t LEDstate = 1;
-Ticker timer1;
-Ticker timer2;
 
+Ticker timer1;
+uint8_t RelayState = 0;
 
 void handle_Root()
 {
@@ -34,7 +32,7 @@ void handle_GetStatus()
 	JsonDocument doc;
 	doc["SSID"] = WiFi.softAPSSID();
 	doc["IP"] = WiFi.softAPIP().toString();
-	doc["LED State"] = !(LEDstate) ? "high" : "low";
+	doc["Relay State"] = (digitalRead(RELAY_PIN)) ? "high" : "low";
 
 	String str;
 	serializeJson(doc, str);
@@ -43,7 +41,7 @@ void handle_GetStatus()
 
 void timer1_callback()
 {
-	digitalWrite(LED_BUILTIN, !LEDstate);
+	digitalWrite(RELAY_PIN, RelayState);
 }
 
 void handle_SetTimer()
@@ -61,7 +59,7 @@ void handle_SetTimer()
 	{
 		if(doc["state"] == 0 || doc["state"] == 1)
 		{
-			LEDstate = doc["state"].as<uint8_t>();
+			RelayState = doc["state"].as<uint8_t>();
 			timer1.once(doc["seconds"].as<float_t>(), timer1_callback);
 			server.send(200, "text/html", "<h1>changing in " + String(doc["seconds"].as<float_t>()) + " seconds</h1>");
 		}
@@ -279,4 +277,11 @@ void handle_wifisetting()
 			server.send(400, "text/html", "<h1>invalid keys</h1>");
 		}
 	}
+}
+
+void handle_wifioff()
+{
+	
+	wifi_off();
+	server.send(200, "text/html", "<h1>wifi turned off</h1>");
 }

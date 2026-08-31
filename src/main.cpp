@@ -5,6 +5,7 @@
 #include <savefile.h>
 #include <scheduler.h>
 #include <button.h>
+#include <statusLED.h>
 
 // put function declarations here:
 
@@ -15,16 +16,13 @@ void setup() {
   Serial.println("Turned On");
 
   // put your setup code here, to run once:
-
-  /* Setup built-in LED */
-  pinMode(LED_BUILTIN,OUTPUT);
-  digitalWrite(LED_BUILTIN, 1);
-
   LoadFiles();
   RTC_Begin();
   SysTS_RTC();
 	WebserverSetup();
+  Scheduler_Init();
   ButtonInit();
+  statusLED_Init();
 }
 
 void loop() {
