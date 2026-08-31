@@ -19,8 +19,8 @@
 #define TehranUTC 12600
 
 uint8_t RelayState;
-Ticker timer1;
-Ticker timer2;
+Ticker timer1_task;
+Ticker timer2_wifi;
 
 void handle_Root()
 {
@@ -69,7 +69,7 @@ void handle_SetTimer()
 		if(doc["state"] == 0 || doc["state"] == 1)
 		{
 			RelayState = doc["state"].as<uint8_t>();
-			timer1.once(doc["seconds"].as<float_t>(), timer1_callback);
+			timer1_task.once(doc["seconds"].as<float_t>(), timer1_callback);
 			server.send(200, "text/html", "<h1>changing in " + String(doc["seconds"].as<float_t>()) + " seconds</h1>");
 		}
 		else
@@ -111,6 +111,7 @@ void handle_SetSysTimestamp()
 void handle_GetDate()
 {
 	UpdateSysDate_systemTS();
+	Date_t shamsi = gregorianToPersian_Claude(systemDate.year, systemDate.month, systemDate.day);
 
 	JsonDocument doc;
 	doc["Timestamp"] = systemtimestamp;
@@ -123,13 +124,13 @@ void handle_GetDate()
 	doc["miladi"]["second"] = systemDate.second;
 	doc["miladi"]["date"] = String(systemDate.year) + "/" + String(systemDate.month) + "/" + String(systemDate.day);
 
-	Date_t shamsi1 = gregorianToPersian_ChatGPT(systemDate.year, systemDate.month, systemDate.day);
-	Date_t shamsi2 = gregorianToPersian_Claude(systemDate.year, systemDate.month, systemDate.day);
-	doc["shamsi"]["date1"] = String(shamsi1.year) + "/" + String(shamsi1.month) + "/" + String(shamsi1.day);
-	doc["shamsi"]["date2"] = String(shamsi2.year) + "/" + String(shamsi2.month) + "/" + String(shamsi2.day);
+	doc["shamsi"]["year"] = shamsi.year;
+	doc["shamsi"]["month"] = shamsi.month;
+	doc["shamsi"]["day"] = shamsi.day;
 	doc["shamsi"]["hour"] = systemDate.hour;
 	doc["shamsi"]["minute"] = systemDate.minute;
 	doc["shamsi"]["second"] = systemDate.second;
+	doc["shamsi"]["date"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
 
 	String str;
 	serializeJson(doc, str);
@@ -266,7 +267,7 @@ void handle_wifisetting()
 			}
 			else
 			{
-				server.send(400, "text/html", "<h1>error</h1>");
+				server.send(400, "text/html", "<h1>error changing ssid or password</h1>");
 			}
 		}
 		else
@@ -284,6 +285,6 @@ void timer2_callback()
 void handle_wifioff()
 {
 	
-	timer2.attach(5.f, timer2_callback);
+	timer2_wifi.attach(5.f, timer2_callback);
 	server.send(200, "text/html", "<h1>wifi turning off in 5 seconds</h1>");
 }
