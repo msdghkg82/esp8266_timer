@@ -5,7 +5,7 @@
 
 
 String SSID = "ESP";
-String PASSWD = "12345678";
+String PASSWD = "";
 
 void wifi_setup()
 {
