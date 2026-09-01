@@ -36,11 +36,11 @@ void handle_GetStatus()
 	doc["IP"] = WiFi.softAPIP().toString();
 	if(WiFi.getMode() == WIFI_OFF)
 	{
-		doc["wifi"] = "wifi off";
+		doc["wifi"] = "WiFi off";
 	}
 	else if (WiFi.getMode() == WIFI_AP)
 	{
-		doc["wifi"] = "wifi on";
+		doc["wifi"] = "WiFi on";
 	}
 	
 	doc["Relay State"] = (digitalRead(RELAY_PIN)) ? "high" : "low";
