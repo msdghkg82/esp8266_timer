@@ -71,21 +71,11 @@ void ButtonTask()
         return;
     }
 
-    if (duration >= 10000 && duration <= 15000)
-    {
-        Serial.println("10sec Press");
-
-        removeFile(WIFICONFIG_FILE);
-
-        setLEDInterval(300);
-        resetLEDInterval();
-
-        return;
-    }
-
     if (duration >= 20000)
     {
         Serial.println("20sec Press");
+        Log("===Button===");
+        Log("20sec press");
 
         ResetSchedules();
         removeFile(SCHEDULE_FILE);
@@ -93,6 +83,20 @@ void ButtonTask()
         systemtimestamp = 0;
 
         setLEDInterval(100);
+        resetLEDInterval();
+
+        return;
+    }
+
+    if (duration >= 10000)
+    {
+        Serial.println("10sec Press");
+        Log("===Button===");
+        Log("10sec press");
+
+        removeFile(WIFICONFIG_FILE);
+
+        setLEDInterval(300);
         resetLEDInterval();
 
         return;
