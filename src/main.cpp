@@ -12,12 +12,13 @@
 
 
 void setup() {
-  Log("===System Starting===");
 	Serial.begin(115200);
 	Serial.println();
   Serial.println("Turned On");
 
   // put your setup code here, to run once:
+
+  Log("===System Starting===");
   LoadFiles();
   RTC_Begin();
   SysTS_RTC();
