@@ -174,6 +174,7 @@ void ButtonTask()
 
                         ResetSchedules();
                         removeFile(SCHEDULE_FILE);
+                        removeFile(LOG_FILE);
 
                         systemtimestamp = 0;
 
@@ -198,7 +199,7 @@ void ButtonTask()
                         Log("10sec Press");
 
                         removeFile(WIFICONFIG_FILE);
-
+                        
                         setLEDInterval(300);
                         resetLEDInterval();
 
