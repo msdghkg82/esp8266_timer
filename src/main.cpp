@@ -21,6 +21,7 @@ void setup() {
   LoadFiles();
   RTC_Begin();
   SysTS_RTC();
+  UpdateSysDate_systemTS();
   Log("RTC Initialized and Timestamp Set");
 	WebserverSetup();
   Scheduler_Init();
