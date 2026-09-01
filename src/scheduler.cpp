@@ -67,11 +67,9 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 			{
 				return false;
 			}
-			else
-			{
-				ScheduleArray[ScheduleCount].id = id;
-			}
 		}
+		
+		ScheduleArray[ScheduleCount].id = id;
 
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
