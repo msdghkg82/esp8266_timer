@@ -6,6 +6,7 @@
 #include <savefile.h>
 #include <wifi.h>
 #include <statusLED.h>
+#include <log.h>
 
 #define BUTTON_PIN 12
 
@@ -56,6 +57,8 @@ void ButtonTask()
         else if(pressDuration >= 20000)
         {
             Serial.println("20 second press");
+            Log("===Button===");
+            Log("20sec Press");
             ResetSchedules();
             removeFile(SCHEDULE_FILE);
             systemtimestamp = 0;
@@ -65,6 +68,8 @@ void ButtonTask()
         else if(pressDuration >= 10000 && pressDuration <= 15000)
         {
             Serial.println("10 second press");
+            Log("===Button===");
+            Log("10sec Press");
             removeFile(WIFICONFIG_FILE);
             setLEDInterval(300); // Set LED blink interval to 300 ms
             resetLEDInterval();
