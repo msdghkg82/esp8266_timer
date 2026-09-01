@@ -68,7 +68,7 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 				return false;
 			}
 		}
-		
+
 		ScheduleArray[ScheduleCount].id = id;
 
 		ScheduleArray[ScheduleCount].flag = true;
@@ -179,6 +179,8 @@ void ProcessSchedules()
 		case monthly:
 			ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
 			break;
+		default:
+			Log("Schedule done | id: " + String(ScheduleArray[0].id) + " | interval: " + String(ScheduleArray[0].interval));
 	}
 
 	sortSchedules();
