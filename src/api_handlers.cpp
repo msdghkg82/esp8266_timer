@@ -107,8 +107,12 @@ void handle_SetSysTimestamp()
 	{
 		if(doc["timestamp"].is<time_t>())
 		{
-			RTC_SetTimestamp(doc["timestamp"].as<time_t>());
-			SysTS_RTC();
+			//RTC_SetTimestamp(doc["timestamp"].as<time_t>());
+			//SysTS_RTC();
+
+			//systemtimestamp = doc["timestamp"].as<time_t>();
+			//SetupSysTimestampIncrement();
+
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
 			Log("timestamp set to: " + String(doc["timestamp"].as<time_t>()));
 		}

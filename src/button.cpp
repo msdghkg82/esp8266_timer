@@ -176,7 +176,7 @@ void ButtonTask()
                         removeFile(SCHEDULE_FILE);
                         removeFile(LOG_FILE);
 
-                        systemtimestamp = 0;
+                        //systemtimestamp = 0;
 
                         setLEDInterval(100);
                         resetLEDInterval();
