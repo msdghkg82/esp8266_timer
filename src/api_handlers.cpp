@@ -107,11 +107,9 @@ void handle_SetSysTimestamp()
 	{
 		if(doc["timestamp"].is<time_t>())
 		{
-			//RTC_SetTimestamp(doc["timestamp"].as<time_t>());
-			//SysTS_RTC();
-
-			systemtimestamp = doc["timestamp"].as<time_t>();
-			SetupSysTimestampIncrement();
+			RTC_SetTimestamp(doc["timestamp"].as<time_t>());
+			SysTS_RTC();
+			UpdateSysDate_systemTS();
 
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
 			Log("timestamp set to: " + String(doc["timestamp"].as<time_t>()));
@@ -204,7 +202,7 @@ void handle_SetSchedule()
 		if(doc["scheduletimestamp"].is<time_t>() && 
 		   doc["state"].is<uint8_t>() && 
 		   doc["interval"].is<uint8_t>() && 
-		   doc["id"].is<uint16_t>()) 
+		   doc["id"].is<uint8_t>()) 
 		{
 			if(AddSchedule(doc["scheduletimestamp"], doc["state"], static_cast<Repeat_t>(doc["interval"]), doc["id"]))
 			{

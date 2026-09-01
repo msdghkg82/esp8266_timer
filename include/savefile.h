@@ -8,6 +8,7 @@
 #define SCHEDULE_FILE    "/schedules.json"
 #define WIFICONFIG_FILE  "/wificonfig.json"
 
+void mountLittleFS();
 void LoadFiles();
 bool loadSchedulesFile();
 bool saveSchedulesFile();

@@ -11,8 +11,8 @@ void Log(const String& message)
     if(!file) return;
 
     file.print("[");
-    file.print(String(systemtimestamp));
-    file.print(" | ");
+//    file.print(String(systemtimestamp));
+//    file.print(" | ");
     file.print(String(systemDate.year) + "/" + String(systemDate.month) + "/" + String(systemDate.day));
     file.print(" | ");
     file.print(String(systemDate.hour) + ":" + String(systemDate.minute) + ":" + String(systemDate.second));

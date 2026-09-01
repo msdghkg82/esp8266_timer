@@ -24,7 +24,7 @@ void sortSchedules()
 	);
 }
 
-bool RemoveSchedule(uint16_t id)
+bool RemoveSchedule(uint8_t id)
 {
 	for(uint8_t i = 0; i < ScheduleCount; i++)
 	{
@@ -42,7 +42,7 @@ bool RemoveSchedule(uint16_t id)
 	return false;
 }
 
-bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id)
+bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint8_t id)
 {
 	if(ScheduleCount < 50)
 	{

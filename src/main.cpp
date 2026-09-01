@@ -18,6 +18,7 @@ void setup() {
 
   // put your setup code here, to run once:
 
+  mountLittleFS();
   Log("===System Starting===");
   LoadFiles();
   RTC_Begin();

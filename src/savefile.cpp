@@ -12,40 +12,39 @@
 
 #define MAX_SCHEDULES 50
 
-
-void LoadFiles()
+void mountLittleFS()
 {
-    if(!LittleFS.begin())
-    {
+    if (!LittleFS.begin()) {
         Serial.println("LittleFS mount failed");
         Log("LittleFS mount failed");
+    } else {
+        Serial.println("LittleFS mounted");
+        Log("LittleFS mounted");
+    }
+}
+void LoadFiles()
+{
+
+    if(loadSchedulesFile())
+    {
+        Serial.println("Schedules loaded successfully");
+        Log("Schedules loaded successfully");
     }
     else
     {
-        Serial.println("LittleFS mounted");
-        Log("LittleFS mounted");
+        Serial.println("Failed to load schedules");
+        Log("Failed to load schedules");
+    }
 
-        if(loadSchedulesFile())
-        {
-            Serial.println("Schedules loaded successfully");
-            Log("Schedules loaded successfully");
-        }
-        else
-        {
-            Serial.println("Failed to load schedules");
-            Log("Failed to load schedules");
-        }
-
-        if(loadWifiConfig())
-        {
-            Serial.println("WifiConfig loaded successfully");
-            Log("WifiConfig loaded successfully");
-        }
-        else
-        {
-            Serial.println("Failed to load WifiConfig");
-            Log("Failed to load WifiConfig");
-        }
+    if(loadWifiConfig())
+    {
+         Serial.println("WifiConfig loaded successfully");
+         Log("WifiConfig loaded successfully");
+    }
+    else
+     {
+        Serial.println("Failed to load WifiConfig");
+        Log("Failed to load WifiConfig");
     }
 }
 
