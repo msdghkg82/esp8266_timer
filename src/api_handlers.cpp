@@ -14,6 +14,7 @@
 #include <DateConverter.h>
 #include <scheduler.h>
 #include <wifi.h>
+#include <log.h>
 
 
 #define TehranUTC 12600
@@ -29,6 +30,7 @@ void handle_Root()
 
 void handle_GetStatus()
 {
+	Log("===Get Status===");
 	JsonDocument doc;
 	doc["SSID"] = WiFi.softAPSSID();
 	doc["IP"] = WiFi.softAPIP().toString();
@@ -51,16 +53,19 @@ void handle_GetStatus()
 void timer1_callback()
 {
 	digitalWrite(RELAY_PIN, RelayState);
+	Log("Relay state changed to " + String(RelayState));
 }
 
 void handle_SetTimer()
 {
+	Log("===Set Timer===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
+		Log("invalid json for set timer");
 		return;
 	}
 
@@ -71,26 +76,31 @@ void handle_SetTimer()
 			RelayState = doc["state"].as<uint8_t>();
 			timer1_task.once(doc["seconds"].as<float_t>(), timer1_callback);
 			server.send(200, "text/html", "<h1>changing in " + String(doc["seconds"].as<float_t>()) + " seconds</h1>");
+			Log("Relay state will change to " + String(RelayState) + " in " + String(doc["seconds"].as<float_t>()) + " seconds");
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid state</h1>");
+			Log("invalid state for set timer");
 		}
 	}
 	else
 	{
 		server.send(400, "text/html", "<h1>invalid keys</h1>");
+		Log("invalid keys for set timer");
 	}
 }
 
 void handle_SetSysTimestamp()
 {
+	Log("===Set System Timestamp===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
+		Log("invalid json for set system timestamp");
 		return;
 	}
 	else
@@ -100,16 +110,19 @@ void handle_SetSysTimestamp()
 			RTC_SetTimestamp(doc["timestamp"].as<time_t>());
 			SysTS_RTC();
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
+			Log("timestamp set to: " + String(doc["timestamp"].as<time_t>()));
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid timestamp</h1>");
+			Log("invalid timestamp for set system timestamp");
 		}
 	}
 }
 
 void handle_GetDate()
 {
+	Log("===Get Date===");
 	UpdateSysDate_systemTS();
 	Date_t shamsi = gregorianToPersian_Claude(systemDate.year, systemDate.month, systemDate.day);
 
@@ -139,12 +152,14 @@ void handle_GetDate()
 
 void handle_RemoveSchedule()
 {
+	Log("===Remove Schedule===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
+		Log("invalid json for remove schedule");
 		return;
 	}
 	else
@@ -158,22 +173,26 @@ void handle_RemoveSchedule()
 			else
 			{
 				server.send(400, "text/html", "<h1>schedule not found</h1>");
+				Log("schedule not found");
 			}
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid id</h1>");
+			Log("invalid id for remove schedule");
 		}
 	}
 }
 
 void handle_SetSchedule()
 {
+	Log("===Set Schedule===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 	if(error)
 		{
 			server.send(400, "text/html", "<h1>invalid json</h1>");
+			Log("invalid json for set schedule");
 			return;
 		}
 	else
@@ -190,17 +209,20 @@ void handle_SetSchedule()
 			else
 			{
 				server.send(200, "text/html", "<h1>invalid key values</h1>");
+				Log("invalid key values for schedule");
 			}
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid keys</h1>");
+			Log("invalid keys for schedule");
 		}
 	}
 }
 
 void handle_GetSchedules()
 {
+	Log("===Get Schedules===");
     JsonDocument doc;
 
 	doc["SystemTimestamp"] = systemtimestamp;
@@ -223,10 +245,12 @@ void handle_GetSchedules()
     serializeJson(doc, str);
 
     server.send(200, "application/json", str);
+	Log("Schedules Sent");
 }
 
 void handle_ResetSchedules()
 {
+	Log("===Reset Schedules===");
 	if(ResetSchedules())
 	{
 		server.send(200, "text/html", "<h1>schedules reset</h1>");
@@ -234,17 +258,20 @@ void handle_ResetSchedules()
 	else
 	{
 		server.send(200, "text/html", "<h1>schedules reset but didnt save</h1>");
+		Log("schedules reset but didnt save");
 	}
 	
 }
 
 void handle_wifisetting()
 {
+	Log("===WiFi Setting===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
+		Log("invalid json for wifi setting");
 		return;
 	}
 	else
@@ -255,6 +282,7 @@ void handle_wifisetting()
 													   && doc["passwd"].as<String>().length() < 8))
 			{
 				server.send(400, "text/html", "<h1>invalid ssid or password length</h1>");
+				Log("invalid ssid or password length");
 				return;
 			}
 
@@ -264,15 +292,18 @@ void handle_wifisetting()
 			if(saveWifiConfig())
 			{
 				server.send(200, "text/html", "<h1>changes takes effect after reset</h1>");
+				Log("wifi settings changed, ssid: " + SSID + ", password: " + PASSWD);
 			}
 			else
 			{
 				server.send(400, "text/html", "<h1>error changing ssid or password</h1>");
+				Log("error changing ssid or password");
 			}
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid keys</h1>");
+			Log("invalid keys for wifi setting");
 		}
 	}
 }
@@ -280,11 +311,43 @@ void handle_wifisetting()
 void timer2_callback()
 {
 	wifi_off();
+	Log("wifi turned off");
 }
 
 void handle_wifioff()
 {
-	
+	Log("===WiFi Off===");
 	timer2_wifi.attach(5.f, timer2_callback);
 	server.send(200, "text/html", "<h1>wifi turning off in 5 seconds</h1>");
+	Log("wifi turning off in 5 seconds");
+}
+
+void handle_GetLog()
+{
+	if(!LittleFS.exists(LOG_FILE))
+    {
+        server.send(404,"text/html", "<h1>Log file not found</h1>");
+        return;
+    }
+
+    File file = LittleFS.open(LOG_FILE, "r");
+
+	server.sendHeader("Content-Disposition", "attachment; filename=log.txt");
+    server.streamFile(file, "application/octet-stream");
+
+    file.close();
+}
+
+void handle_RemoveLog()
+{
+	if(removeFile(LOG_FILE))
+	{
+		server.send(200, "text/html", "<h1>log file removed</h1>");
+		Log("log file removed");
+	}
+	else
+	{
+		server.send(400, "text/html", "<h1>error removing log file</h1>");
+		Log("error removing log file");
+	}
 }

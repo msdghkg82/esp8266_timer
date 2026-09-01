@@ -5,6 +5,7 @@
 #include <DateConverter.h>
 #include <RTC.h>
 #include <algorithm>
+#include <log.h>
 
 Schedule_t ScheduleArray[50] = {};
 uint8_t ScheduleCount = 0;
@@ -32,6 +33,7 @@ bool RemoveSchedule(uint16_t id)
 			ScheduleArray[i] = Schedule_t{};
 			sortSchedules();
 			ScheduleCount--;
+			Log("Schedule removed, id: " + String(id));
 			saveSchedulesFile();
 			return true;
 		}
@@ -74,6 +76,10 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint16_t id
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
 		sortSchedules();
+		Log("Schedule added, timestamp: " + String(timestamp) + 
+			", state: " + String(state) + 
+			", interval: " + String(interval) + 
+			", id: " + String(id));
 		saveSchedulesFile();
 		return true;
 	}
@@ -88,6 +94,7 @@ bool ResetSchedules()
 	}
 
 	ScheduleCount = 0;
+	Log("Schedules reset");
 	if(!saveSchedulesFile()) return false;
     
     return true;
