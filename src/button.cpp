@@ -70,7 +70,7 @@ void ButtonTask()
         return;
     }
 
-    if (duration >= 20000)
+    if (duration >= 20000 && duration <= 25000)
     {
         Serial.println("20sec Press");
 
@@ -85,7 +85,7 @@ void ButtonTask()
         return;
     }
 
-    if (duration >= 10000)
+    if (duration >= 10000 && duration <= 15000)
     {
         Serial.println("10sec Press");
 
@@ -97,10 +97,14 @@ void ButtonTask()
         return;
     }
 
-    if(duration >= 3000)
+    if(duration >= 3000 && duration <= 5000)
     {
         Serial.println("3sec Press");
         wifi_toggle_onoff();
+        setLEDInterval(50);
+        resetLEDInterval(2.f);
+
+        return;
     }
 
     Serial.println("Short Press");

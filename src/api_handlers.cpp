@@ -291,12 +291,13 @@ void handle_wifisetting()
 void timer2_callback()
 {
 	wifi_toggle_mode();
-	setLEDInterval(3.f);
+	setLEDInterval(50);
+	resetLEDInterval(2.f);
 }
 
 void handle_wifitoggle()
 {
-	timer2_wifi.attach(5.f, timer2_callback);
+	timer2_wifi.once(5.f, timer2_callback);
 	server.send(200, "text/html", "<h1>wifi changing in 5 seconds</h1>");
 }
 
