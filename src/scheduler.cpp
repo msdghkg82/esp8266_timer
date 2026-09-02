@@ -33,8 +33,8 @@ bool RemoveSchedule(uint8_t id)
 			ScheduleArray[i] = Schedule_t{};
 			sortSchedules();
 			ScheduleCount--;
-			Log("Schedule removed, id: " + String(id));
 			saveSchedulesFile();
+			Log("Schedule with id: " + String(id) + " removed");
 			return true;
 		}
 	}
@@ -74,11 +74,12 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint8_t id)
 		ScheduleArray[ScheduleCount].flag = true;
 		ScheduleCount++;
 		sortSchedules();
-		Log("Schedule added, timestamp: " + String(timestamp) + 
-			", state: " + String(state) + 
-			", interval: " + String(interval) + 
-			", id: " + String(id));
 		saveSchedulesFile();
+		Log("Schedule with id: " + String(id) + 
+			" timestamp: " + String(timestamp) +
+			" state: " + String(state) + 
+			" interval: " + String(interval) +
+			" added");
 		return true;
 	}
 	else return false;
@@ -92,9 +93,8 @@ bool ResetSchedules()
 	}
 
 	ScheduleCount = 0;
-	Log("Schedules reset");
 	if(!saveSchedulesFile()) return false;
-    
+    Log("Schedules reset");
     return true;
 }
 
@@ -180,7 +180,7 @@ void ProcessSchedules()
 			ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
 			break;
 		default:
-			Log("Schedule done | id: " + String(ScheduleArray[0].id) + " | interval: " + String(ScheduleArray[0].interval));
+			Log("Schedule With id: " + String(ScheduleArray[0].id) + " done");
 	}
 
 	sortSchedules();

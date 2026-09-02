@@ -6,7 +6,6 @@
 #include <savefile.h>
 #include <wifi.h>
 #include <statusLED.h>
-#include <log.h>
 
 #define BUTTON_PIN 12
 
@@ -74,8 +73,6 @@ void ButtonTask()
     if (duration >= 20000)
     {
         Serial.println("20sec Press");
-        Log("===Button===");
-        Log("20sec press");
 
         ResetSchedules();
         removeFile(SCHEDULE_FILE);
@@ -83,7 +80,7 @@ void ButtonTask()
         systemtimestamp = 0;
 
         setLEDInterval(100);
-        resetLEDInterval();
+        resetLEDInterval(10.f);
 
         return;
     }
@@ -91,15 +88,19 @@ void ButtonTask()
     if (duration >= 10000)
     {
         Serial.println("10sec Press");
-        Log("===Button===");
-        Log("10sec press");
 
         removeFile(WIFICONFIG_FILE);
 
         setLEDInterval(300);
-        resetLEDInterval();
+        resetLEDInterval(10.f);
 
         return;
+    }
+
+    if(duration >= 3000)
+    {
+        Serial.println("3sec Press");
+        wifi_toggle_onoff();
     }
 
     Serial.println("Short Press");

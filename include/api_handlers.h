@@ -11,7 +11,7 @@ void handle_GetSchedules();
 void handle_ResetSchedules();
 void handle_RemoveSchedule();
 void handle_wifisetting();
-void handle_wifioff();
+void handle_wifitoggle();
 void handle_GetLog();
 void handle_RemoveLog();
 

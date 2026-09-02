@@ -5,7 +5,6 @@
 #include <RTC.h>
 #include <scheduler.h>
 #include <wifi.h>
-#include <log.h>
 
 #define TMP_SCHEDULE_FILE   "/schedules.tmp"
 #define TMP_WIFICONFIG_FILE  "/wificonfig.tmp"
@@ -16,10 +15,8 @@ void mountLittleFS()
 {
     if (!LittleFS.begin()) {
         Serial.println("LittleFS mount failed");
-        Log("LittleFS mount failed");
     } else {
         Serial.println("LittleFS mounted");
-        Log("LittleFS mounted");
     }
 }
 void LoadFiles()
@@ -28,23 +25,19 @@ void LoadFiles()
     if(loadSchedulesFile())
     {
         Serial.println("Schedules loaded successfully");
-        Log("Schedules loaded successfully");
     }
     else
     {
         Serial.println("Failed to load schedules");
-        Log("Failed to load schedules");
     }
 
     if(loadWifiConfig())
     {
          Serial.println("WifiConfig loaded successfully");
-         Log("WifiConfig loaded successfully");
     }
     else
      {
         Serial.println("Failed to load WifiConfig");
-        Log("Failed to load WifiConfig");
     }
 }
 
@@ -54,7 +47,6 @@ static bool replaceFile(const char* temporaryFile, const char* destinationFile)
     if (LittleFS.exists(destinationFile) &&
         !LittleFS.remove(destinationFile)) {
         Serial.printf("Failed to remove %s\n", destinationFile);
-        Log("Failed to remove " + String(destinationFile));
         return false;
     }
 
@@ -62,7 +54,6 @@ static bool replaceFile(const char* temporaryFile, const char* destinationFile)
         Serial.printf("Failed to rename %s to %s\n",
                       temporaryFile,
                       destinationFile);
-        Log("Failed to rename " + String(temporaryFile) + " to " + String(destinationFile));
 
         LittleFS.remove(temporaryFile);
         return false;
@@ -78,7 +69,6 @@ bool loadSchedulesFile()
 
     if (!LittleFS.exists(SCHEDULE_FILE)) {
         Serial.println("Schedule file does not exist");
-        Log("Schedule file does not exist");
         return false;
     }
 
@@ -86,7 +76,6 @@ bool loadSchedulesFile()
 
     if (!file) {
         Serial.println("Failed to open schedule file");
-        Log("Failed to open schedule file");
         return false;
     }
 
@@ -97,7 +86,6 @@ bool loadSchedulesFile()
     if (error) {
         Serial.print("Failed to parse schedule file: ");
         Serial.println(error.c_str());
-        Log("Failed to parse schedule file: " + String(error.c_str()));
         return false;
     }
 
@@ -105,14 +93,12 @@ bool loadSchedulesFile()
 
     if (schedules.isNull()) {
         Serial.println("Schedule array is missing");
-        Log("Schedule array is missing");
         return false;
     }
 
     for (JsonObject schedule : schedules) {
         if (ScheduleCount >= MAX_SCHEDULES) {
             Serial.println("Schedule limit reached");
-            Log("Schedule limit reached");
             break;
         }
 
@@ -137,7 +123,6 @@ bool loadSchedulesFile()
 
     Serial.print("Loaded schedules: ");
     Serial.println(ScheduleCount);
-    Log("Loaded schedules: " + String(ScheduleCount));
 
     return true;
 }
@@ -149,7 +134,6 @@ bool saveSchedulesFile()
 
     if (!file) {
         Serial.println("Failed to open temporary schedule file");
-        Log("Failed to open temporary schedule file");
         return false;
     }
 
@@ -171,7 +155,6 @@ bool saveSchedulesFile()
 
     if (written == 0) {
         Serial.println("Failed to write schedule file");
-        Log("Failed to write schedule file");
         LittleFS.remove(TMP_SCHEDULE_FILE);
         return false;
     }
@@ -181,7 +164,6 @@ bool saveSchedulesFile()
     }
 
     Serial.println("Schedules saved");
-    Log("Schedules saved");
     return true;
 }
 
@@ -190,20 +172,21 @@ bool saveWifiConfig()
     File file = LittleFS.open(TMP_WIFICONFIG_FILE, "w");
     if (!file) {
         Serial.println("Failed to open temporary wificonfig file");
-        Log("Failed to open temporary wificonfig file");
         return false;
     }
 
     JsonDocument doc;
-    doc["ssid"] = SSID;
-    doc["passwd"] = PASSWD;
+    doc["AP"]["ssid"] = AP_SSID;
+    doc["AP"]["passwd"] = AP_PASSWD;
+
+    doc["STA"]["ssid"] = STA_SSID;
+    doc["STA"]["passwd"] = STA_PASSWD;
 
     const size_t written = serializeJson(doc, file);
     file.close();
 
     if (written == 0) {
         Serial.println("Failed to write wificonfig file");
-        Log("Failed to write wificonfig file");
         LittleFS.remove(TMP_WIFICONFIG_FILE);
         return false;
     }
@@ -213,7 +196,6 @@ bool saveWifiConfig()
     }
 
     Serial.println("wificonfig saved");
-    Log("WifiConfig saved");
     return true;
 }
 
@@ -222,7 +204,6 @@ bool loadWifiConfig()
     if(!LittleFS.exists(WIFICONFIG_FILE)) 
     {
         Serial.println("wificonfig file does not exist");
-        Log("wificonfig file does not exist");
         return false;
     }
 
@@ -231,7 +212,6 @@ bool loadWifiConfig()
     if(!file) 
     {
         Serial.println("Failed to open wificonfig file");
-        Log("Failed to open wificonfig file");
         return false;
     }
 
@@ -243,12 +223,14 @@ bool loadWifiConfig()
     {
         Serial.print("Failed to parse wificonfig file: ");
         Serial.println(error.c_str());
-        Log("Failed to parse wificonfig file" + String(error.c_str()));
         return false;
     }
 
-    SSID = doc["ssid"].as<String>();
-    PASSWD = doc["passwd"].as<String>();
+    AP_SSID = doc["AP"]["ssid"].as<String>();
+    AP_PASSWD = doc["AP"]["passwd"].as<String>();
+    
+    STA_SSID = doc["STA"]["ssid"].as<String>();
+    STA_PASSWD = doc["STA"]["passwd"].as<String>();
 
     return true;
 }
@@ -262,12 +244,10 @@ bool removeFile(String path)
     if (!LittleFS.remove(path)) {
         Serial.print("Failed to remove file: ");
         Serial.println(path);
-        Log("Failed to remove file: " + path);
         return false;
     }
 
     Serial.print("File removed: ");
     Serial.println(path);
-    Log("File removed: " + path);
     return true;
 }

@@ -15,9 +15,8 @@
 #include <scheduler.h>
 #include <wifi.h>
 #include <log.h>
+#include <statusLED.h>
 
-
-#define TehranUTC 12600
 
 uint8_t RelayState;
 Ticker timer1_task;
@@ -30,7 +29,6 @@ void handle_Root()
 
 void handle_GetStatus()
 {
-	Log("===Get Status===");
 	JsonDocument doc;
 	doc["SSID"] = WiFi.softAPSSID();
 	doc["IP"] = WiFi.softAPIP().toString();
@@ -53,19 +51,16 @@ void handle_GetStatus()
 void timer1_callback()
 {
 	digitalWrite(RELAY_PIN, RelayState);
-	Log("Relay state changed to " + String(RelayState));
 }
 
 void handle_SetTimer()
 {
-	Log("===Set Timer===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
-		Log("invalid json for set timer");
 		return;
 	}
 
@@ -76,31 +71,26 @@ void handle_SetTimer()
 			RelayState = doc["state"].as<uint8_t>();
 			timer1_task.once(doc["seconds"].as<float_t>(), timer1_callback);
 			server.send(200, "text/html", "<h1>changing in " + String(doc["seconds"].as<float_t>()) + " seconds</h1>");
-			Log("Relay state will change to " + String(RelayState) + " in " + String(doc["seconds"].as<float_t>()) + " seconds");
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid state</h1>");
-			Log("invalid state for set timer");
 		}
 	}
 	else
 	{
 		server.send(400, "text/html", "<h1>invalid keys</h1>");
-		Log("invalid keys for set timer");
 	}
 }
 
 void handle_SetSysTimestamp()
 {
-	Log("===Set System Timestamp===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
-		Log("invalid json for set system timestamp");
 		return;
 	}
 	else
@@ -112,19 +102,16 @@ void handle_SetSysTimestamp()
 			UpdateSysDate_systemTS();
 
 			server.send(200, "text/html", "<h1>timestamp set</h1>");
-			Log("timestamp set to: " + String(doc["timestamp"].as<time_t>()));
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid timestamp</h1>");
-			Log("invalid timestamp for set system timestamp");
 		}
 	}
 }
 
 void handle_GetDate()
 {
-	Log("===Get Date===");
 	UpdateSysDate_systemTS();
 	Date_t shamsi = gregorianToPersian_Claude(systemDate.year, systemDate.month, systemDate.day);
 
@@ -154,14 +141,12 @@ void handle_GetDate()
 
 void handle_RemoveSchedule()
 {
-	Log("===Remove Schedule===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
-		Log("invalid json for remove schedule");
 		return;
 	}
 	else
@@ -175,26 +160,22 @@ void handle_RemoveSchedule()
 			else
 			{
 				server.send(400, "text/html", "<h1>schedule not found</h1>");
-				Log("schedule not found");
 			}
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid id</h1>");
-			Log("invalid id for remove schedule");
 		}
 	}
 }
 
 void handle_SetSchedule()
 {
-	Log("===Set Schedule===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 	if(error)
 		{
 			server.send(400, "text/html", "<h1>invalid json</h1>");
-			Log("invalid json for set schedule");
 			return;
 		}
 	else
@@ -211,20 +192,17 @@ void handle_SetSchedule()
 			else
 			{
 				server.send(200, "text/html", "<h1>invalid key values</h1>");
-				Log("invalid key values for schedule");
 			}
 		}
 		else
 		{
 			server.send(400, "text/html", "<h1>invalid keys</h1>");
-			Log("invalid keys for schedule");
 		}
 	}
 }
 
 void handle_GetSchedules()
 {
-	Log("===Get Schedules===");
     JsonDocument doc;
 
 	doc["SystemTimestamp"] = systemtimestamp;
@@ -247,12 +225,10 @@ void handle_GetSchedules()
     serializeJson(doc, str);
 
     server.send(200, "application/json", str);
-	Log("Schedules Sent");
 }
 
 void handle_ResetSchedules()
 {
-	Log("===Reset Schedules===");
 	if(ResetSchedules())
 	{
 		server.send(200, "text/html", "<h1>schedules reset</h1>");
@@ -260,68 +236,68 @@ void handle_ResetSchedules()
 	else
 	{
 		server.send(200, "text/html", "<h1>schedules reset but didnt save</h1>");
-		Log("schedules reset but didnt save");
 	}
 	
 }
 
 void handle_wifisetting()
 {
-	Log("===WiFi Setting===");
 	JsonDocument doc;
 	DeserializationError error = deserializeJson(doc, server.arg("plain"));
 	if(error)
 	{
 		server.send(400, "text/html", "<h1>invalid json</h1>");
-		Log("invalid json for wifi setting");
 		return;
 	}
 	else
 	{
-		if(doc["ssid"].is<String>() && doc["passwd"].is<String>())
+		if(doc["esp_ssid"].is<String>()   && doc["esp_passwd"].is<String>()
+		&& doc["modem_ssid"].is<String>() && doc["modem_passwd"].is<String>())
 		{
-			if(doc["ssid"].as<String>().length() > 32 || (doc["passwd"].as<String>().length() > 64 
-													   && doc["passwd"].as<String>().length() < 8))
+			if(((doc["esp_ssid"].as<String>().length() > 32 || (doc["esp_passwd"].as<String>().length() > 64 
+													   		&&  doc["esp_passwd"].as<String>().length() < 8)))
+														
+			&& (doc["modem_ssid"].as<String>().length() > 32 || (doc["modem_passwd"].as<String>().length() > 64 
+													   		 &&  doc["modem_passwd"].as<String>().length() < 8)))
 			{
-				server.send(400, "text/html", "<h1>invalid ssid or password length</h1>");
-				Log("invalid ssid or password length");
-				return;
-			}
-
-			SSID = doc["ssid"].as<String>();
-			PASSWD = doc["passwd"].as<String>();
-			
-			if(saveWifiConfig())
-			{
-				server.send(200, "text/html", "<h1>changes takes effect after reset</h1>");
-				Log("wifi settings changed, ssid: " + SSID + ", password: " + PASSWD);
+				AP_SSID = doc["esp_ssid"].as<String>();
+				AP_PASSWD = doc["esp_passwd"].as<String>();
+				STA_SSID = doc["modem_ssid"].as<String>();
+				STA_PASSWD = doc["modem_passwd"].as<String>();
 			}
 			else
 			{
-				server.send(400, "text/html", "<h1>error changing ssid or password</h1>");
-				Log("error changing ssid or password");
+				server.send(400, "text/html", "<h1>invalid ssid or password length</h1>");
+				return;
 			}
 		}
 		else
 		{
-			server.send(400, "text/html", "<h1>invalid keys</h1>");
-			Log("invalid keys for wifi setting");
+			server.send(400, "text/html", "<h1>invalid key values</h1>");
+			return;
+		}
+
+		if(saveWifiConfig())
+		{
+			server.send(200, "text/html", "<h1>changes takes effect after reset</h1>");
+		}
+		else
+		{
+			server.send(400, "text/html", "<h1>error changing ssid or password</h1>");
 		}
 	}
 }
 
 void timer2_callback()
 {
-	wifi_off();
-	Log("wifi turned off");
+	wifi_toggle_mode();
+	setLEDInterval(3.f);
 }
 
-void handle_wifioff()
+void handle_wifitoggle()
 {
-	Log("===WiFi Off===");
 	timer2_wifi.attach(5.f, timer2_callback);
-	server.send(200, "text/html", "<h1>wifi turning off in 5 seconds</h1>");
-	Log("wifi turning off in 5 seconds");
+	server.send(200, "text/html", "<h1>wifi changing in 5 seconds</h1>");
 }
 
 void handle_GetLog()
@@ -345,11 +321,9 @@ void handle_RemoveLog()
 	if(removeFile(LOG_FILE))
 	{
 		server.send(200, "text/html", "<h1>log file removed</h1>");
-		Log("log file removed");
 	}
 	else
 	{
 		server.send(400, "text/html", "<h1>error removing log file</h1>");
-		Log("error removing log file");
 	}
 }

@@ -5,10 +5,14 @@
 
 #include <WString.h>
 
-extern String SSID;
-extern String PASSWD;
+extern String AP_SSID;
+extern String AP_PASSWD;
+extern String STA_SSID;
+extern String STA_PASSWD;
 
-void wifi_setup();
 void wifi_off();
+void wifi_on();
+void wifi_toggle_onoff();
+void wifi_toggle_mode();
 
 #endif /* WIFI_H */

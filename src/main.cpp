@@ -6,7 +6,6 @@
 #include <scheduler.h>
 #include <button.h>
 #include <statusLED.h>
-#include <log.h>
 
 // put function declarations here:
 
@@ -19,17 +18,14 @@ void setup() {
   // put your setup code here, to run once:
 
   mountLittleFS();
-  Log("===System Starting===");
   LoadFiles();
   RTC_Begin();
   SysTS_RTC();
   UpdateSysDate_systemTS();
-  Log("RTC Initialized and Timestamp Set");
 	WebserverSetup();
   Scheduler_Init();
   ButtonInit();
   statusLED_Init();
-  Log("System Initialized and Loop Started");
 }
 
 void loop() {

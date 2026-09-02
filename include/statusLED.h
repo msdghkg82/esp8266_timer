@@ -2,10 +2,10 @@
 #define STATUSLED_H
 
 #pragma once
-#include <stdint.h>
+#include <Arduino.h>
 
 void statusLED_Init();
 void setLEDInterval(uint32_t interval);
-void resetLEDInterval();
+void resetLEDInterval(float_t resetTime);
 
 #endif // STATUSLED_H

@@ -3,7 +3,6 @@
 #include <Ticker.h>
 #include <Wire.h>
 #include <RTClib.h>
-#include <log.h>
 
 RTC_DS1307 rtc;
 
@@ -48,13 +47,11 @@ void RTC_Begin()
 	if(!rtc.begin())
 	{
 		Serial.println("RTC not found");
-		Log("RTC not found");
 		while(1);
 	}
 	else
 	{
 		Serial.println("RTC connected");
-		Log("RTC connected");
 	}
 }
 

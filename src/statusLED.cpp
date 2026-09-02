@@ -29,7 +29,7 @@ void setLEDInterval(uint32_t interval)
     ledTicker.attach_ms(interval, ledTicker1_callback); // Start a new ticker with the updated interval
 }
 
-void resetLEDInterval()
+void resetLEDInterval(float_t resetTime)
 {
-    ledTicker2.once(10.f, ledTicker2_callback);
+    ledTicker2.once(resetTime, ledTicker2_callback);
 }

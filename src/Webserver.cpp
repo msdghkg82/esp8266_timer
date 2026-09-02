@@ -21,7 +21,7 @@ void WebserverConnectAPIs()
 	server.on("/api/schedules/reset", HTTP_PUT, handle_ResetSchedules);
 	server.on("/api/schedules/remove", HTTP_PUT, handle_RemoveSchedule);
 	server.on("/api/wifi/setting", HTTP_PUT, handle_wifisetting);
-	server.on("/api/wifi/off", HTTP_PUT, handle_wifioff);
+	server.on("/api/wifi/toggle", HTTP_PUT, handle_wifitoggle);
 	server.on("/api/log/download", HTTP_GET, handle_GetLog);
 	server.on("/api/log/remove", HTTP_DELETE, handle_RemoveLog);
 	server.onNotFound([]() {
@@ -31,7 +31,7 @@ void WebserverConnectAPIs()
 
 void WebserverSetup()
 {
-	wifi_setup();
+	wifi_on();
 	server.begin();
 	delay(100);
 	WebserverConnectAPIs();
