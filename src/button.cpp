@@ -7,37 +7,40 @@
 #include <wifi.h>
 #include <statusLED.h>
 
+
 #define BUTTON_PIN 12
 
-volatile unsigned long pressStartTime = 0;
-volatile unsigned long pressDuration = 0;
+
+volatile bool buttonPressed = false;
 volatile bool buttonReleased = false;
-volatile unsigned long lastInterrupt = 0;
+
+volatile unsigned long pressStart = 0;
+volatile unsigned long pressTime = 0;
 
 
 void IRAM_ATTR buttonISR()
 {
-    unsigned long now = millis();
+    bool state = digitalRead(BUTTON_PIN);
 
-    // Debounce
-    if (now - lastInterrupt < 50) return;
-
-    lastInterrupt = now;
-
-    if (digitalRead(BUTTON_PIN) == LOW)
+    if(state == LOW)
     {
-        pressStartTime = now;
+        if(!buttonPressed)
+        {
+            buttonPressed = true;
+            pressStart = millis();
+        }
     }
     else
     {
-        if (pressStartTime != 0)
+        if(buttonPressed)
         {
-            pressDuration = now - pressStartTime;
+            pressTime = millis() - pressStart;
+            buttonPressed = false;
             buttonReleased = true;
-            pressStartTime = 0;
         }
     }
 }
+
 
 
 void ButtonInit()
@@ -52,25 +55,35 @@ void ButtonInit()
 }
 
 
+
 void ButtonTask()
 {
-    if (!buttonReleased) return;
+    if(!buttonReleased)
+        return;
+
 
     noInterrupts();
-    unsigned long duration = pressDuration;
+
+    unsigned long duration = pressTime;
     buttonReleased = false;
+
     interrupts();
+
+
 
     Serial.print("Button duration: ");
     Serial.println(duration);
 
-    if (duration < 500)
+
+
+    if(duration < 500)
     {
         Serial.println("Noise");
         return;
     }
 
-    if (duration >= 20000 && duration <= 25000)
+
+    if(duration >= 20000)
     {
         Serial.println("20sec Press");
 
@@ -85,7 +98,9 @@ void ButtonTask()
         return;
     }
 
-    if (duration >= 10000 && duration <= 15000)
+
+
+    if(duration >= 10000)
     {
         Serial.println("10sec Press");
 
@@ -97,15 +112,20 @@ void ButtonTask()
         return;
     }
 
-    if(duration >= 3000 && duration <= 5000)
+
+
+    if(duration >= 3000)
     {
         Serial.println("3sec Press");
+
         wifi_toggle_onoff();
+
         setLEDInterval(50);
         resetLEDInterval(2.f);
 
         return;
     }
+
 
     Serial.println("Short Press");
 }
