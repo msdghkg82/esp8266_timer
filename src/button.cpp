@@ -91,6 +91,7 @@ void ButtonTask()
         removeFile(SCHEDULE_FILE);
 
         systemtimestamp = 0;
+        SysTS_RTC();
 
         setLEDInterval(100);
         resetLEDInterval(10.f);
