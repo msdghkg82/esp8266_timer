@@ -1,5 +1,5 @@
 #ifndef WIFI_H_
-#define WIFI_H
+#define WIFI_H_
 
 #pragma once
 
@@ -15,4 +15,4 @@ void wifi_on();
 void wifi_toggle_onoff();
 void wifi_toggle_mode();
 
-#endif /* WIFI_H */
+#endif /* WIFI_H_ */

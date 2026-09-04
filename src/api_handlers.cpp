@@ -32,13 +32,20 @@ void handle_GetStatus()
 	JsonDocument doc;
 	doc["SSID"] = WiFi.softAPSSID();
 	doc["IP"] = WiFi.softAPIP().toString();
-	if(WiFi.getMode() == WIFI_OFF)
+	switch (WiFi.getMode())
 	{
-		doc["wifi"] = "WiFi off";
-	}
-	else if (WiFi.getMode() == WIFI_AP)
-	{
-		doc["wifi"] = "WiFi on";
+		case WIFI_OFF:
+			doc["Mode"] = "OFF";
+			break;
+		case WIFI_STA:
+			doc["Mode"] = "STA";
+			break;
+		case WIFI_AP:
+			doc["Mode"] = "AP";
+			break;
+		case WIFI_AP_STA:
+			doc["Mode"] = "AP+STA";
+			break;
 	}
 	
 	doc["Relay State"] = (digitalRead(RELAY_PIN)) ? "high" : "low";
@@ -255,20 +262,21 @@ void handle_wifisetting()
 		&& doc["modem_ssid"].is<String>() && doc["modem_passwd"].is<String>())
 		{
 			if(((doc["esp_ssid"].as<String>().length() > 32 || (doc["esp_passwd"].as<String>().length() > 64 
-													   		&&  doc["esp_passwd"].as<String>().length() < 8)))
+													   		||  doc["esp_passwd"].as<String>().length() < 8)))
 														
-			&& (doc["modem_ssid"].as<String>().length() > 32 || (doc["modem_passwd"].as<String>().length() > 64 
-													   		 &&  doc["modem_passwd"].as<String>().length() < 8)))
+			|| (doc["modem_ssid"].as<String>().length() > 32 || (doc["modem_passwd"].as<String>().length() > 64 
+													   		 ||  doc["modem_passwd"].as<String>().length() < 8)))
+			{
+				
+				server.send(400, "text/html", "<h1>invalid ssid or password length</h1>");
+				return;
+			}
+			else
 			{
 				AP_SSID = doc["esp_ssid"].as<String>();
 				AP_PASSWD = doc["esp_passwd"].as<String>();
 				STA_SSID = doc["modem_ssid"].as<String>();
 				STA_PASSWD = doc["modem_passwd"].as<String>();
-			}
-			else
-			{
-				server.send(400, "text/html", "<h1>invalid ssid or password length</h1>");
-				return;
 			}
 		}
 		else
