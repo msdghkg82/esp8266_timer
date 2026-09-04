@@ -1,5 +1,4 @@
 #include <RTC.h>
-#include <savefile.h>
 #include <Ticker.h>
 #include <Wire.h>
 #include <RTClib.h>
@@ -47,7 +46,7 @@ void RTC_Begin()
 	if(!rtc.begin())
 	{
 		Serial.println("RTC not found");
-		while(1);
+		while(1) yield();
 	}
 	else
 	{
