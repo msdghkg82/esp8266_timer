@@ -1,13 +1,19 @@
 #include "Arduino.h"
 
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPUpdateServer.h>
 
 #include <Webserver.h>
 #include <api_handlers.h>
 #include <wifi.h>
-#include <log.h>
 
 ESP8266WebServer server(80);
+
+static ESP8266HTTPUpdateServer httpUpdater;
+static const char* OTA_USERNAME = "admin";
+static const char* OTA_PASSWORD = "admin";
+
+
 
 void WebserverConnectAPIs()
 {
@@ -32,14 +38,19 @@ void WebserverConnectAPIs()
 void WebserverSetup()
 {
 	wifi_on();
-	server.begin();
-	delay(100);
 	WebserverConnectAPIs();
+	OTA_Setup(server);
+	server.begin();
+
 	Serial.println("Server Running");
-	Log("Webserver Running");
 }
 
 void WebserverHandleClients()
 {
 	server.handleClient();
+}
+
+void OTA_Setup(ESP8266WebServer &server)
+{
+	httpUpdater.setup(&server, "/api/firmware", OTA_USERNAME, OTA_PASSWORD);
 }

@@ -12,5 +12,6 @@ void WebserverSetup();
 
 void WebserverHandleClients();
 
+void OTA_Setup(ESP8266WebServer &server);
 
 #endif /* WEBSERVER_H_ */
