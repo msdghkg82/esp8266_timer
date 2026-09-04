@@ -151,7 +151,7 @@ void handle_RemoveSchedule()
 	}
 	else
 	{
-		if(doc["id"].is<uint16_t>())
+		if(doc["id"].is<uint8_t>())
 		{
 			if(RemoveSchedule(doc["id"]))
 			{
