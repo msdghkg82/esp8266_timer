@@ -209,18 +209,17 @@ void ProcessSchedules()
 		case monthly:
 			ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
 			break;
-		default:
-			switch(LogLang)
-			{
-				case persian:
-					Log("وظیفه با شناسه: " + String(ScheduleArray[0].id) + "انجام شد");
-					break;
-				case english:
-					Log("Schedule With id: " + String(ScheduleArray[0].id) + " done");
-					break;
-			}
 	}
 
+	switch(LogLang)
+	{
+		case persian:
+			Log("وظیفه با شناسه: " + String(ScheduleArray[0].id) + "انجام شد");
+			break;
+		case english:
+			Log("Schedule With id: " + String(ScheduleArray[0].id) + " done");
+			break;
+	}
 	sortSchedules();
 	saveSchedulesFile();
 }
