@@ -92,6 +92,7 @@ void ButtonTask()
         removeFile(SCHEDULE_FILE);
         removeFile(WIFICONFIG_FILE);
         removeFile(LOG_FILE);
+        removeFile(LOGLANG_FILE);
         systemtimestamp = 0;
 
         setLEDInterval(100);
