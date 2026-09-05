@@ -1,6 +1,6 @@
 #include "DateConverter.h"
-#include <time.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 
 
 Date_t gregorianToPersian_ChatGPT(int gy, int gm, int gd)
@@ -96,7 +96,6 @@ bool isPersianLeapYear_ChatGPT(int jy)
  * ------------------------------------------------------------------
  */
 
-#include <stdbool.h>
 
 /* ------------------------------------------------------------------
  * isPersianLeapYear — REPLACEABLE.
@@ -224,4 +223,36 @@ Date_t gregorianToPersian_Claude(int gy, int gm, int gd)
     result.month = jm;
     result.day = (int)remaining + 1;
     return result;
+}
+
+// شمارش روزها از epoch (1970-01-01) تا تاریخ گریگوری داده‌شده.
+// الگوریتم بسته‌ی Howard Hinnant، بدون وابستگی به libc یا جدول‌های تایم‌زون/DST.
+static int64_t DaysFromCivil(int64_t year, int month, int day)
+{
+    year -= (month <= 2) ? 1 : 0;
+    const int64_t era = (year >= 0 ? year : year - 399) / 400;
+    const uint32_t yoe = (uint32_t)(year - era * 400);                 // [0, 399]
+    const uint32_t doy = (153u * (uint32_t)(month + (month > 2 ? -3 : 9)) + 2) / 5
+                          + (uint32_t)day - 1;                          // [0, 365]
+    const uint32_t doe = yoe * 365u + yoe / 4u - yoe / 100u + doy;      // [0, 146096]
+    return era * 146097 + (int64_t)doe - 719468;
+}
+
+// جایگزین سلف-کانتینِ timegm(): تبدیل struct tm (UTC/محلی خام) به time_t،
+// بدون هیچ اعمال آفست تایم‌زون یا DST، بدون وابستگی به تنظیمات سیستم.
+time_t MyTimegm(const struct tm *tm)
+{
+    // struct tm: tm_year = سال - 1900 ، tm_mon = ماه - 1 (0..11)
+    const int64_t year  = (int64_t)tm->tm_year + 1900;
+    const int     month = tm->tm_mon + 1;               // به بازه‌ی 1..12
+    const int     day   = tm->tm_mday;
+
+    const int64_t days = DaysFromCivil(year, month, day);
+
+    const int64_t seconds = days * 86400LL
+                           + (int64_t)tm->tm_hour * 3600LL
+                           + (int64_t)tm->tm_min  * 60LL
+                           + (int64_t)tm->tm_sec;
+
+    return (time_t)seconds;
 }

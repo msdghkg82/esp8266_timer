@@ -21,6 +21,7 @@ void setup() {
   LoadFiles();
   RTC_Begin();
   SysTS_RTC();
+  setTimezone();
   UpdateSysDate_systemTS();
 	WebserverSetup();
   Scheduler_Init();

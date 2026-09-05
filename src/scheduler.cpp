@@ -132,7 +132,7 @@ uint32_t handleMonthlySchedules(Schedule_t& Schedule)
 {
 	struct tm miladi{};
 	time_t timestamp = Schedule.ScheduleTimeStamp;
-	localtime_r(&timestamp, &miladi);
+	gmtime_r(&timestamp, &miladi);
 	Date_t shamsi = gregorianToPersian_Claude(miladi.tm_year + 1900, miladi.tm_mon + 1, miladi.tm_mday);
 
 	if(shamsi.day <= 29)

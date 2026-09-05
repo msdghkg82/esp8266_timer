@@ -6,9 +6,6 @@
 
 #include <sys/time.h>
 
-#define TehranUTC_hour      3
-#define TehranUTC_minute    30
-
 extern volatile time_t systemtimestamp;
 
 typedef struct {
@@ -29,6 +26,6 @@ void incrementSysTimestamp();
 time_t get_RTCtimestamp();
 void RTC_Begin();
 void SysTS_RTC();
-
+void setTimezone();
 
 #endif /* RTC_H_ */

@@ -2,6 +2,7 @@
 #include <Ticker.h>
 #include <Wire.h>
 #include <RTClib.h>
+#include <DateConverter.h>
 
 RTC_DS1307 rtc;
 
@@ -9,11 +10,12 @@ volatile time_t systemtimestamp = 0;
 
 volatile DateTime_t systemDate;
 
+
 void RTC_SetTimestamp(time_t timestamp)
 {
 	struct tm t{};
 	time_t now = timestamp;
-	localtime_r(&now, &t);
+	gmtime_r(&now, &t);
 
 	DateTime dt(
 		t.tm_year + 1900,
@@ -80,11 +82,17 @@ time_t get_RTCtimestamp()
 	t.tm_min = dt.minute();
 	t.tm_sec = dt.second();
 
-	return mktime(&t);
+	return MyTimegm(&t);
 }
 
 void SysTS_RTC()
 {
 	systemtimestamp = get_RTCtimestamp();
 	SetupSysTimestampIncrement();
+}
+
+void setTimezone()
+{
+	setenv("TZ", "IRST-3:30", 1);
+	tzset();
 }

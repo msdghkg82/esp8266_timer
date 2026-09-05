@@ -128,16 +128,16 @@ void handle_GetDate()
 	doc["miladi"]["year"] = systemDate.year;
 	doc["miladi"]["month"] = systemDate.month;
 	doc["miladi"]["day"] = systemDate.day;
-	doc["miladi"]["hour"] = systemDate.hour + TehranUTC_hour;
-	doc["miladi"]["minute"] = systemDate.minute + TehranUTC_minute;
+	doc["miladi"]["hour"] = systemDate.hour;
+	doc["miladi"]["minute"] = systemDate.minute;
 	doc["miladi"]["second"] = systemDate.second;
 	doc["miladi"]["date"] = String(systemDate.year) + "/" + String(systemDate.month) + "/" + String(systemDate.day);
 
 	doc["shamsi"]["year"] = shamsi.year;
 	doc["shamsi"]["month"] = shamsi.month;
 	doc["shamsi"]["day"] = shamsi.day;
-	doc["shamsi"]["hour"] = systemDate.hour + TehranUTC_hour;
-	doc["shamsi"]["minute"] = systemDate.minute + TehranUTC_minute;
+	doc["shamsi"]["hour"] = systemDate.hour;
+	doc["shamsi"]["minute"] = systemDate.minute;
 	doc["shamsi"]["second"] = systemDate.second;
 	doc["shamsi"]["date"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
 
