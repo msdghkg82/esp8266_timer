@@ -117,6 +117,10 @@ void handle_SetSysTimestamp()
 	}
 }
 
+
+#define TehranUTC_hour      3
+#define TehranUTC_minute    30
+
 void handle_GetDate()
 {
 	UpdateSysDate_systemTS();
@@ -128,16 +132,16 @@ void handle_GetDate()
 	doc["miladi"]["year"] = systemDate.year;
 	doc["miladi"]["month"] = systemDate.month;
 	doc["miladi"]["day"] = systemDate.day;
-	doc["miladi"]["hour"] = systemDate.hour;
-	doc["miladi"]["minute"] = systemDate.minute;
+	doc["miladi"]["hour"] = systemDate.hour + TehranUTC_hour;
+	doc["miladi"]["minute"] = systemDate.minute + TehranUTC_minute;
 	doc["miladi"]["second"] = systemDate.second;
 	doc["miladi"]["date"] = String(systemDate.year) + "/" + String(systemDate.month) + "/" + String(systemDate.day);
 
 	doc["shamsi"]["year"] = shamsi.year;
 	doc["shamsi"]["month"] = shamsi.month;
 	doc["shamsi"]["day"] = shamsi.day;
-	doc["shamsi"]["hour"] = systemDate.hour;
-	doc["shamsi"]["minute"] = systemDate.minute;
+	doc["shamsi"]["hour"] = systemDate.hour + TehranUTC_hour;
+	doc["shamsi"]["minute"] = systemDate.minute + TehranUTC_minute;
 	doc["shamsi"]["second"] = systemDate.second;
 	doc["shamsi"]["date"] = String(shamsi.year) + "/" + String(shamsi.month) + "/" + String(shamsi.day);
 
@@ -334,5 +338,37 @@ void handle_RemoveLog()
 	else
 	{
 		server.send(400, "text/html", "<h1>error removing log file</h1>");
+	}
+}
+
+void handle_ChangeLang()
+{
+	JsonDocument doc;
+	DeserializationError error = deserializeJson(doc, server.arg("plain"));
+	if(error)
+	{
+		server.send(400, "text/html", "<h1>invalid json</h1>");
+		return;
+	}
+	else
+	{
+		if(doc["language"].is<String>())
+		{
+			if(doc["language"] == "persian")
+			{
+				LogLang = persian;
+				server.send(200, "text/html", "<h1>زبان سیستم به فارسی تغییر کرد</h1>");
+				return;
+			}
+
+			if (doc["language"] == "english")
+			{
+				LogLang = english;
+				server.send(200, "text/html", "<h1>language changed to English</h1>");
+				return;
+			}
+			
+			server.send(400, "text/html", "<h1>invalid language</h1>");
+		}
 	}
 }

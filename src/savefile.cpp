@@ -4,9 +4,11 @@
 #include <RTC.h>
 #include <scheduler.h>
 #include <wifi.h>
+#include <log.h>
 
-#define TMP_SCHEDULE_FILE   "/schedules.tmp"
+#define TMP_SCHEDULE_FILE    "/schedules.tmp"
 #define TMP_WIFICONFIG_FILE  "/wificonfig.tmp"
+#define TMP_LOGLANG_FILE     "/loglang.tmp"
 
 #define MAX_SCHEDULES 50
 
@@ -35,8 +37,17 @@ void LoadFiles()
          Serial.println("WifiConfig loaded successfully");
     }
     else
-     {
+    {
         Serial.println("Failed to load WifiConfig");
+    }
+
+    if(loadLogLang())
+    {
+         Serial.println("LogLanguage loaded successfully");
+    }
+    else
+    {
+        Serial.println("LogLanguage to load WifiConfig");
     }
 }
 
@@ -230,6 +241,66 @@ bool loadWifiConfig()
     
     STA_SSID = doc["STA"]["ssid"].as<String>();
     STA_PASSWD = doc["STA"]["passwd"].as<String>();
+
+    return true;
+}
+
+bool saveLogLang()
+{
+    File file = LittleFS.open(TMP_LOGLANG_FILE, "w");
+    if (!file) {
+        Serial.println("Failed to open temporary LogLanguage file");
+        return false;
+    }
+
+    JsonDocument doc;
+    doc["loglang"] = LogLang;
+
+    const size_t written = serializeJson(doc, file);
+    file.close();
+
+    if (written == 0) {
+        Serial.println("Failed to write LogLanguage file");
+        LittleFS.remove(TMP_LOGLANG_FILE);
+        return false;
+    }
+
+    if (!replaceFile(TMP_LOGLANG_FILE, LOGLANG_FILE)) {
+        return false;
+    }
+
+    Serial.println("LogLanguage saved");
+    return true;
+}
+
+bool loadLogLang()
+{
+    if(!LittleFS.exists(LOGLANG_FILE)) 
+    {
+        Serial.println("LogLanguage file does not exist");
+        return false;
+    }
+
+    File file = LittleFS.open(LOGLANG_FILE, "r");
+
+    if(!file) 
+    {
+        Serial.println("Failed to open LogLanguage file");
+        return false;
+    }
+
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, file);
+    file.close();
+
+    if(error) 
+    {
+        Serial.print("Failed to parse LogLanguage file: ");
+        Serial.println(error.c_str());
+        return false;
+    }
+
+    LogLang = static_cast<LogLang_t>(doc["loglang"] | 0);
 
     return true;
 }

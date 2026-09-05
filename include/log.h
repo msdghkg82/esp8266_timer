@@ -6,6 +6,13 @@
 
 #define LOG_FILE "/log.txt"
 
+typedef enum {
+    english = 0,
+    persian 
+} LogLang_t;
+
+extern LogLang_t LogLang;
+
 void Log(const String& message);
 
 #endif // LOG_H

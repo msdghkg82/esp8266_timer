@@ -14,5 +14,6 @@ void handle_wifisetting();
 void handle_wifitoggle();
 void handle_GetLog();
 void handle_RemoveLog();
+void handle_ChangeLang();
 
 #endif /* API_HANDLERS_H_ */

@@ -34,7 +34,15 @@ bool RemoveSchedule(uint8_t id)
 			sortSchedules();
 			ScheduleCount--;
 			saveSchedulesFile();
-			Log("Schedule with id: " + String(id) + " removed");
+			switch(LogLang)
+			{
+				case persian:
+					Log("وظیفه با شناسه: " + String(id) + " حذف شد");
+					break;
+				case english:
+					Log("Schedule with id: " + String(id) + " removed");
+					break;
+			}
 			return true;
 		}
 	}
@@ -75,11 +83,23 @@ bool AddSchedule(time_t timestamp, uint8_t state, Repeat_t interval, uint8_t id)
 		ScheduleCount++;
 		sortSchedules();
 		saveSchedulesFile();
-		Log("Schedule with id: " + String(id) + 
-			" timestamp: " + String(timestamp) +
-			" state: " + String(state) + 
-			" interval: " + String(interval) +
-			" added");
+		switch(LogLang)
+		{
+			case persian:
+				Log("وظیفه با شناسه: " + String(id) + 
+				" تایم استمپ: " + String(timestamp) +
+				" حالت: " + String(state) + 
+				" دوره: " + String(interval) +
+				" اضافه شد");
+				break;
+			case english:
+				Log("Schedule with id: " + String(id) + 
+				" timestamp: " + String(timestamp) +
+				" state: " + String(state) + 
+				" interval: " + String(interval) +
+				" added");
+				break;
+		}
 		return true;
 	}
 	else return false;
@@ -94,7 +114,17 @@ bool ResetSchedules()
 
 	ScheduleCount = 0;
 	if(!saveSchedulesFile()) return false;
-    Log("Schedules reset");
+
+    switch(LogLang)
+	{
+		case persian:
+			Log("لیست وظایف بازنشانی شد");
+			break;
+		case english:
+			Log("Schedules reset");
+			break;
+	}
+
     return true;
 }
 
@@ -180,7 +210,15 @@ void ProcessSchedules()
 			ScheduleArray[0].ScheduleTimeStamp += handleMonthlySchedules(ScheduleArray[0]);
 			break;
 		default:
-			Log("Schedule With id: " + String(ScheduleArray[0].id) + " done");
+			switch(LogLang)
+			{
+				case persian:
+					Log("وظیفه با شناسه: " + String(ScheduleArray[0].id) + "انجام شد");
+					break;
+				case english:
+					Log("Schedule With id: " + String(ScheduleArray[0].id) + " done");
+					break;
+			}
 	}
 
 	sortSchedules();

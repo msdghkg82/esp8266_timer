@@ -6,6 +6,7 @@
 #include <savefile.h>
 #include <wifi.h>
 #include <statusLED.h>
+#include <log.h>
 
 
 #define BUTTON_PIN 12
@@ -89,9 +90,9 @@ void ButtonTask()
 
         ResetSchedules();
         removeFile(SCHEDULE_FILE);
-
-        //systemtimestamp = 0;
-        SysTS_RTC();
+        removeFile(WIFICONFIG_FILE);
+        removeFile(LOG_FILE);
+        systemtimestamp = 0;
 
         setLEDInterval(100);
         resetLEDInterval(10.f);

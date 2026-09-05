@@ -3,6 +3,7 @@
 #include <LittleFS.h>
 #include <RTC.h>
 
+LogLang_t LogLang = english;
 
 void Log(const String& message)
 {
@@ -10,6 +11,7 @@ void Log(const String& message)
 
     if(!file) return;
 
+    UpdateSysDate_systemTS();
     file.print("[");
 //    file.print(String(systemtimestamp));
 //    file.print(" | ");

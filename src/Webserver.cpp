@@ -30,6 +30,7 @@ void WebserverConnectAPIs()
 	server.on("/api/wifi/toggle", HTTP_PUT, handle_wifitoggle);
 	server.on("/api/log/download", HTTP_GET, handle_GetLog);
 	server.on("/api/log/remove", HTTP_DELETE, handle_RemoveLog);
+	server.on("/api/lang", HTTP_PUT, handle_ChangeLang);
 	server.onNotFound([]() {
 		server.send(404, "text/html", "<h1>404 Not Found</h1>");
 	});
