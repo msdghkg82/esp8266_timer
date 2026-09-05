@@ -117,10 +117,6 @@ void handle_SetSysTimestamp()
 	}
 }
 
-
-#define TehranUTC_hour      3
-#define TehranUTC_minute    30
-
 void handle_GetDate()
 {
 	UpdateSysDate_systemTS();

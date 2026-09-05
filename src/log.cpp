@@ -15,9 +15,13 @@ void Log(const String& message)
     file.print("[");
 //    file.print(String(systemtimestamp));
 //    file.print(" | ");
-    file.print(String(systemDate.year) + "/" + String(systemDate.month) + "/" + String(systemDate.day));
+    file.print(String(systemDate.year) + "/" + 
+               String(systemDate.month) + "/" + 
+               String(systemDate.day));
     file.print(" | ");
-    file.print(String(systemDate.hour) + ":" + String(systemDate.minute) + ":" + String(systemDate.second));
+    file.print(String(systemDate.hour + TehranUTC_hour) + ":" + 
+               String(systemDate.minute + TehranUTC_minute) + ":" + 
+               String(systemDate.second));
     file.print("] ");
     file.println(message);
 
